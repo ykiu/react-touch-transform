@@ -1,0 +1,41 @@
+.root {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  background-color: #fff;
+  border-right: solid 1px #ccc;
+}
+
+.menu {
+  padding: 0 16px;
+}
+
+.heading {
+  padding-left: 0;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.heading+.heading {
+  margin-top: 24px;
+}
+
+.heading+.subheading {
+  margin-top: 16px;
+}
+
+.subheading {
+  padding-left: 16px;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.subheading+.subheading {
+  margin-top: 16px;
+}
+
+.subheading+.heading {
+  margin-top: 24px;
+}
