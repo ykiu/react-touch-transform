@@ -1,24 +1,20 @@
 import Head from "next/head";
 import styles from "./react-touch-transform.module.css";
-import MenuButton from "../components/MenuButton";
-import Sidenav from "../components/Sidenav";
-import { FC, useState } from "react";
+import { FC } from "react";
 import packageJson from "../package.json";
+import Layout from "../components/Layout";
 
 export interface ReactTouchTransformProps {
   children?: never;
 }
 
 const ReactTouchTransform: FC<ReactTouchTransformProps> = () => {
-  const [navOpen, setNavOpen] = useState(false);
   return (
-    <div className={styles.container}>
+    <Layout>
       <Head>
         <title>React Touch Tranform</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <MenuButton onClick={() => setNavOpen(true)} />
-      {navOpen && <Sidenav onClose={() => setNavOpen(false)} />}
       <main className={styles.main}>
         <h1 className={styles.title}>React Touch Transform</h1>
         <p className={styles.shortDescription}>
@@ -50,6 +46,7 @@ const ReactTouchTransform: FC<ReactTouchTransformProps> = () => {
             <li>___ kib gzipped</li>
             <li>60fps</li>
             <li>Customizable</li>
+            <li>Zero Dependencies</li>
           </ul>
         </section>
       </main>
@@ -64,7 +61,7 @@ const ReactTouchTransform: FC<ReactTouchTransformProps> = () => {
           <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
         </a>
       </footer> */}
-    </div>
+    </Layout>
   );
 };
 

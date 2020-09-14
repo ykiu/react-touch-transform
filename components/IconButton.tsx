@@ -1,13 +1,15 @@
-import { ReactNode, HTMLAttributes, FC } from "react";
+import { FC, ButtonHTMLAttributes } from "react";
 import clsx from "clsx";
 import styles from "./IconButton.module.css";
 
-export interface IconButtonProps extends HTMLAttributes<HTMLElement> {
-  children?: ReactNode;
-}
+export type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
-const IconButton: FC<IconButtonProps> = ({ className, ...rest }) => {
-  return <button className={clsx(styles.root, className)} {...rest} />;
+const IconButton: FC<IconButtonProps> = ({ className, children, ...rest }) => {
+  return (
+    <button className={clsx(styles.root, className)} {...rest}>
+      {children}
+    </button>
+  );
 };
 
 export default IconButton;
