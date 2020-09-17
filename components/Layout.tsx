@@ -9,9 +9,9 @@ const Layout: FC<LayoutProps> = ({ children }) => {
   const toggleNav = useCallback(() => setNavOpen((curr) => !curr), []);
   return (
     <div>
+      {children}
       <MenuButton onClick={toggleNav} />
       {navOpen && <Sidenav onClose={toggleNav} />}
-      {children}
     </div>
   );
 };

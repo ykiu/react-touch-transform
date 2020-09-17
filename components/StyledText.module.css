@@ -1,0 +1,18 @@
+.root {
+  padding: 0 16px;
+}
+
+.root>h1 {
+  font-size: 225%;
+}
+
+.root>p {
+  line-height: 1.5;
+}
+
+.root>h1+p {
+  margin-top: 16px;
+  margin-bottom: 40px;
+  font-size: 175%;
+}
+

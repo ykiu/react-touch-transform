@@ -1,8 +1,9 @@
 import Head from "next/head";
-import styles from "./react-touch-transform.module.css";
+import styles from "./index.module.css";
 import { FC } from "react";
 import packageJson from "../package.json";
 import Layout from "../components/Layout";
+import Container from "../components/Container";
 
 export interface ReactTouchTransformProps {
   children?: never;
@@ -38,17 +39,19 @@ const ReactTouchTransform: FC<ReactTouchTransformProps> = () => {
           height={403}
           className={styles.gif}
         />
-        <section className={styles.section}>
-          <header>
-            <h2 className={styles.heading}>Features</h2>
-          </header>
-          <ul className={styles.ul}>
-            <li>___ kib gzipped</li>
-            <li>60fps</li>
-            <li>Customizable</li>
-            <li>Zero Dependencies</li>
-          </ul>
-        </section>
+        <Container>
+          <section className={styles.section}>
+            <header>
+              <h2 className={styles.heading}>Features</h2>
+            </header>
+            <ul className={styles.ul}>
+              <li>___ kib gzipped</li>
+              <li>60fps</li>
+              <li>Customizable</li>
+              <li>Zero Dependencies</li>
+            </ul>
+          </section>
+        </Container>
       </main>
 
       {/* <footer className={styles.footer}>
