@@ -9,7 +9,6 @@
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
-
     // Enable "recommended" configuration from eslint-plugin-prettier. Does three things:
     // - Enables eslint-plugin-prettier
     // - Sets the "prettier/prettier" rule to "error"
@@ -17,13 +16,13 @@
     // - Extends the eslint-config-prettier configuration
     //     - This turns off all rules that conflict with Prettier
     "plugin:prettier/recommended",
-
     // Also turn off style-related rules from some eslint-plugins
     "prettier/@typescript-eslint",
     "prettier/react"
   ],
   "rules": {
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "jsx-a11y/anchor-is-valid": "off"
   },
   "settings": {
     "react": {
@@ -32,13 +31,17 @@
   },
   "overrides": [
     {
-      "files": ["*.tsx"],
+      "files": [
+        "*.tsx"
+      ],
       "rules": {
         "react/prop-types": "off"
       }
     },
     {
-      "files": ["*.js"],
+      "files": [
+        "*.js"
+      ],
       "rules": {
         "@typescript-eslint/explicit-module-boundary-types": "off"
       }
