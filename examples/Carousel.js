@@ -2,6 +2,7 @@ import React, { useRef, useState, useLayoutEffect } from "react";
 import styles from "./Carousel.module.css";
 import { noop } from "../src/utils";
 import CarouselItem from "./CarouselItem";
+import clsx from "clsx";
 
 const urls = [
   "https://storage.googleapis.com/species.appspot.com/CACHE/images/observation_photos/xjT82CBesKbu/d59618c2cb672295e0f5128f973eba7a.jpg",
@@ -109,25 +110,29 @@ export default function Carousel({ className }) {
   }, [index]);
 
   return (
-    <div className={[styles.carousel, className].filter(Boolean).join(" ")}>
-      {[null, ...urls, null].slice(index - 1, index + 2).map((url, i, arr) => {
-        return (
-          url && (
-            <CarouselItem
-              key={url}
-              ref={[prev, current, next][i]}
-              url={url}
-              onOffset={handleOffset}
-              onLeft={arr[i - 1] == null ? null : () => handleShift(-1)}
-              onRight={arr[i + 1] == null ? null : () => handleShift(1)}
-              onScaleSnap={handleScaleSnap}
-              onXYSnap={handleXYSnap}
-              onTouchStart={handleTouchStart}
-              className={i === 1 ? null : "image-prevnext"}
-            />
-          )
-        );
-      })}
+    <div className={clsx(styles.root, className)}>
+      <div className={styles.carousel}>
+        {[null, ...urls, null]
+          .slice(index - 1, index + 2)
+          .map((url, i, arr) => {
+            return (
+              url && (
+                <CarouselItem
+                  key={url}
+                  ref={[prev, current, next][i]}
+                  url={url}
+                  onOffset={handleOffset}
+                  onLeft={arr[i - 1] == null ? null : () => handleShift(-1)}
+                  onRight={arr[i + 1] == null ? null : () => handleShift(1)}
+                  onScaleSnap={handleScaleSnap}
+                  onXYSnap={handleXYSnap}
+                  onTouchStart={handleTouchStart}
+                  className={i === 1 ? null : "image-prevnext"}
+                />
+              )
+            );
+          })}
+      </div>
     </div>
   );
 }
