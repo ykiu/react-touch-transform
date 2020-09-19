@@ -6,12 +6,26 @@ import Head from "next/head";
 import Container from "../components/Container";
 import StyledText from "../components/StyledText";
 import Demo from "../components/Demo";
+import { promises as fs } from "fs";
+import highlight from "../utils/highlight";
+import highlightStyles from "../utils/highlight.module.css";
+import clsx from "clsx";
 
 export interface SimpleCarouselProps {
   children?: never;
+  code: string;
 }
 
-const SimpleCarousel: FC<SimpleCarouselProps> = () => {
+export async function getStaticProps(): Promise<{
+  props: SimpleCarouselProps;
+}> {
+  const code = await fs.readFile("examples/Carousel.js", "utf-8");
+  return {
+    props: { code: highlight(code) },
+  };
+}
+
+const SimpleCarousel: FC<SimpleCarouselProps> = ({ code }) => {
   return (
     <Layout>
       <Head>
@@ -29,6 +43,10 @@ const SimpleCarousel: FC<SimpleCarouselProps> = () => {
             <Demo className={styles.demo}>
               <Carousel className={styles.carousel} />
             </Demo>
+            <pre
+              className={clsx(styles.code, highlightStyles.background)}
+              dangerouslySetInnerHTML={{ __html: code }}
+            ></pre>
           </StyledText>
         </Container>
       </main>

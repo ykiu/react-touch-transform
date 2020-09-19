@@ -1,0 +1,76 @@
+.background {
+  background-color: #212121;
+  color: #ffffff;
+}
+
+.FunctionDeclaration>.Identifier,
+.CallExpression>.Identifier,
+.CallExpression>.PropertyAccessExpression>.Identifier:last-child {
+  color: #A6E22E;
+}
+
+.ElseKeyword,
+.IfKeyword,
+.FromKeyword,
+.ImportKeyword,
+.ReturnKeyword,
+.ExportKeyword,
+.DefaultKeyword,
+.EqualsGreaterThanToken,
+.JsxAttribute>.Identifier {
+  color: #66D9EF;
+}
+
+.FunctionKeyword,
+.ConstKeyword,
+.VarKeyword,
+.LetKeyword,
+.GreaterThanToken,
+.FirstBinaryOperator,
+.EqualsEqualsToken,
+.EqualsEqualsEqualsToken,
+.QuestionToken,
+.ColonToken,
+.ExclamationToken,
+.AmpersandAmpersandToken,
+.BarBarToken,
+.PlusToken,
+.MinusToken {
+  color: #F92672;
+}
+
+.NullKeyword,
+.FirstLiteralToken {
+  color: #AE81FF;
+}
+
+.StringLiteral,
+.TemplateHead,
+.TemplateMiddle,
+.LastTemplateToken {
+  color: #E6DB74;
+}
+
+.JsxSelfClosingElement>.FirstBinaryOperator,
+.JsxSelfClosingElement>.SlashToken,
+.JsxSelfClosingElement>.GreaterThanToken,
+.JsxOpeningElement>.FirstBinaryOperator,
+.JsxOpeningElement>.SlashToken,
+.JsxOpeningElement>.GreaterThanToken,
+.JsxClosingElement>.FirstBinaryOperator,
+.JsxClosingElement>.SlashToken,
+.JsxClosingElement>.GreaterThanToken
+{
+  color: #75715E;
+}
+
+.JsxSelfClosingElement>.Identifier,
+.JsxOpeningElement>.Identifier,
+.JsxClosingElement>.Identifier {
+  color: #FD971F;
+}
+
+.BindingElement>.ColonToken,
+.PropertyAssignment>.ColonToken {
+  color: #ffffff;
+}
