@@ -8,8 +8,7 @@ import StyledText from "../components/StyledText";
 import Demo from "../components/Demo";
 import { promises as fs } from "fs";
 import highlight from "../utils/highlight";
-import highlightStyles from "../utils/highlight.module.css";
-import clsx from "clsx";
+import Code from "../components/Code";
 
 export interface SimpleCarouselProps {
   children?: never;
@@ -43,10 +42,7 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({ code }) => {
             <Demo className={styles.demo}>
               <Carousel className={styles.carousel} />
             </Demo>
-            <pre
-              className={clsx(styles.code, highlightStyles.background)}
-              dangerouslySetInnerHTML={{ __html: code }}
-            ></pre>
+            <Code dangerouslySetInnerHTML={{ __html: code }} />
           </StyledText>
         </Container>
       </main>

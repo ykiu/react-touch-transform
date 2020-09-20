@@ -1,0 +1,10 @@
+.root {
+  padding: 24px 32px;
+  overflow-x: auto;
+}
+
+.code {
+  /* Prevent browsers from reducing font-size */
+  /* https://github.com/necolas/normalize.css/issues/519#issuecomment-197131966 */
+  font-family: monospace, monospace;
+}

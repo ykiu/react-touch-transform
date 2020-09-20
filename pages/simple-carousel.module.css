@@ -16,11 +16,3 @@
   height: 50vh;
   max-height: 500px;
 }
-
-.code {
-  /* Prevent browsers from reducing font-size */
-  /* https://github.com/necolas/normalize.css/issues/519#issuecomment-197131966 */
-  font-family: monospace, monospace;
-  padding: 24px 32px;
-  overflow-x: auto;
-}
