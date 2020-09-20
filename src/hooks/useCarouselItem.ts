@@ -1,10 +1,17 @@
-import usePinchPan from "./usePinchPan";
-import { mulXY, divXY, subXY, addXY, getDistance } from "../utils";
+import usePinchPan, { EventHandler } from "./usePinchPan";
+import { mulXY, divXY, subXY, addXY, getDistance, XY } from "../utils";
+import { RefObject } from "react";
 
 const VELOCITY_THRESHOLD = 0.5;
 const AXIS_LOCK_THRESHOLD = 20;
 
-function deriveAxis(translateXY, scaleFactor, prevAxis) {
+type Axis = "x" | "y" | "any";
+
+function deriveAxis(
+  translateXY: XY,
+  scaleFactor: number,
+  prevAxis: Axis
+): Axis {
   if (scaleFactor !== 1) {
     return "any";
   }
@@ -15,16 +22,47 @@ function deriveAxis(translateXY, scaleFactor, prevAxis) {
   return Math.abs(translateXY[0]) > Math.abs(translateXY[1]) ? "x" : "y";
 }
 
+export interface CarouselItemOptions {
+  onTouchStart: EventHandler;
+  onLeft: () => void;
+  onRight: () => void;
+  onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
+  onScaleSnap: () => void;
+  onXYSnap: () => void;
+}
+
+interface CarouselItemMoveState {
+  offsetTopLeft: XY;
+  offsetBottomRight: XY;
+
+  // Hysteresis values
+  translateXY: XY;
+  timeStamp: number;
+  prevTimeStamp: number;
+  prevTranslateXY: XY;
+
+  // Axis locking
+  activeAxis: Axis;
+}
+
 export default function useCarouselItem(
-  ref,
-  { onTouchStart, onLeft, onRight, onOffset, onScaleSnap, onXYSnap }
-) {
+  ref: RefObject<HTMLElement>,
+  {
+    onTouchStart,
+    onLeft,
+    onRight,
+    onOffset,
+    onScaleSnap,
+    onXYSnap,
+  }: CarouselItemOptions
+): void {
   const makeHandlers = ({ touchStartState, touchMoveState }) => {
-    const extraTouchMoveState = {
+    const extraTouchMoveState: CarouselItemMoveState = {
       offsetTopLeft: [0, 0],
       offsetBottomRight: [0, 0],
 
       // Hysteresis values
+      translateXY: [0, 0],
       timeStamp: null,
       prevTimeStamp: null,
       prevTranslateXY: [0, 0],
@@ -33,7 +71,7 @@ export default function useCarouselItem(
       activeAxis: "any",
     };
 
-    function handleTouchStart(event) {
+    function handleTouchStart(event): false | void {
       if (onTouchStart(event) === false || event.touches.length) {
         return;
       }
@@ -105,7 +143,7 @@ export default function useCarouselItem(
         onXYSnap();
       }
     }
-    function handleTouchMove(event) {
+    function handleTouchMove(event): void {
       const { translateXY, scaleFactor } = touchMoveState;
       const {
         transformOriginXY,
