@@ -62,7 +62,7 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({ code }) => {
       <p>
         You can provide a function named <code>makeHandlers</code> to do some
         extra things with touch events. Your function receives two objects
-        storing information about the current/past status of the target element:{" "}
+        holding information about the current/past status of the target element:{" "}
       </p>
       <ul>
         <li>
@@ -135,11 +135,11 @@ usePinchPan(ref, {
           <code>targetElement.getBoundingClientRect()</code>.
         </li>
         <li>
-          <code>translateXY</code> ([number, number]): The arguments of the CSS
+          <code>translateXY</code> ([number, number]): The arguments to the CSS
           translate() function applied.
         </li>
         <li>
-          <code>scaleFactor</code> (number): The argument of the CSS scale()
+          <code>scaleFactor</code> (number): The argument to the CSS scale()
           function applied.
         </li>
         <li>
@@ -153,8 +153,8 @@ usePinchPan(ref, {
       </ul>
       <p>
         The properties of <code>touchStartState</code> get refreshed only when a
-        new touch point emerged (including when a touch simply started) and a
-        touch point vanished (including when a touch simply ended). They never
+        new touch point emerged (including when a touch simply started) and when
+        a touch point vanished (including when a touch simply ended). They never
         change during touch move.
       </p>
       <h4>
@@ -162,11 +162,11 @@ usePinchPan(ref, {
       </h4>
       <ul>
         <li>
-          <code>scaleFactor</code> (number): The argument of the CSS scale()
+          <code>scaleFactor</code> (number): The argument to the CSS scale()
           function applied.
         </li>
         <li>
-          <code>translateXY</code> ([number, number]): The arguments of the CSS
+          <code>translateXY</code> ([number, number]): The arguments to the CSS
           translate() function applied.
         </li>
       </ul>
@@ -181,7 +181,7 @@ usePinchPan(ref, {
       <p>
         You can override the default behaviour of <code>usePinchPan()</code> by
         assigning values to <code>touchStartState</code> and{" "}
-        <code>touchMoveState</code> from inside <code>onTOuchStart</code> and{" "}
+        <code>touchMoveState</code> from inside <code>onTouchStart</code> and{" "}
         <code>onTouchMove</code>, respectively.
       </p>
       <p>
