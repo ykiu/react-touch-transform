@@ -37,8 +37,8 @@ interface CarouselItemMoveState {
 
   // Hysteresis values
   translateXY: XY;
-  timeStamp: number;
-  prevTimeStamp: number;
+  timeStamp?: number;
+  prevTimeStamp?: number;
   prevTranslateXY: XY;
 
   // Axis locking
