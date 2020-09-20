@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .js,.ts,.jsx,.tsx",
-    "fmt": "eslint . --ext .js,.ts,.jsx,.tsx --fix"
+    "lint": "eslint --cache . --ext .js,.ts,.jsx,.tsx",
+    "fmt": "eslint --cache . --ext .js,.ts,.jsx,.tsx --fix"
   },
   "dependencies": {},
   "devDependencies": {
