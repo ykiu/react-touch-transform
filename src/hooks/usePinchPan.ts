@@ -21,7 +21,7 @@ const mutateStateDefault = {
 };
 
 export interface EventHandler {
-  (event): false | undefined;
+  (event: TouchEvent): false | undefined;
 }
 
 export interface TouchStartState {

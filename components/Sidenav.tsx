@@ -34,7 +34,11 @@ const Sidenav: FC<SidenavProps> = ({ onClose }) => {
           <code>usePan()</code>
         </h3>
         <h3 className={styles.subheading}>
-          <code>usePinchPan()</code>
+          <Link href="/use-pinch-pan">
+            <a>
+              <code>usePinchPan()</code>
+            </a>
+          </Link>
         </h3>
         <h3 className={styles.subheading}>
           <code>useCarousel()</code>

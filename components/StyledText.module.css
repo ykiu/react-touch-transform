@@ -6,8 +6,24 @@
   font-size: 225%;
 }
 
+.root>h2 {
+  margin: 32px 0 24px;
+  font-size: 175%;
+}
+
+.root>h3 {
+  margin: 32px 0 24px;
+  font-size: 150%;
+}
+
+.root>h4 {
+  margin: 24px 0 16px;
+  font-size: 125%;
+}
+
 .root>p {
   line-height: 1.5;
+  margin: 16px 0 16px;
 }
 
 .root>h1+p {
@@ -16,3 +32,12 @@
   font-size: 175%;
 }
 
+.root li {
+  margin-left: 48px;
+  line-height: 1.5;
+}
+
+.root :not(pre) code {
+  background-color: #eee;
+  padding: 2px 4px;
+}
