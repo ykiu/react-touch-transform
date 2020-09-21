@@ -9,7 +9,7 @@ function getMiddleXY(xy1: XY, xy2: XY): XY {
   return [(xy1[0] + xy2[0]) / 2, (xy1[1] + xy2[1]) / 2];
 }
 
-function preventDefault(event) {
+function preventDefault(event: Event): void {
   if (event.cancelable) {
     event.preventDefault();
   }
@@ -25,9 +25,9 @@ export interface EventHandler {
 }
 
 export interface TouchStartState {
-  middleXY?: XY;
-  distance?: number;
-  clientRect: DOMRect;
+  middleXY: XY;
+  distance: number;
+  clientRect?: DOMRect;
   translateXY: XY;
   scaleFactor: number;
   scalingOffset: XY;
@@ -39,11 +39,18 @@ export interface TouchMoveState {
   translateXY: XY;
 }
 
+export interface PinchPanOptionsArgument {
+  touchMoveState: TouchMoveState;
+  touchStartState: TouchStartState;
+}
+
 export interface PinchPanOptions {
-  makeHandlers?: ({
-    touchMoveState: TouchMoveState,
-    touchStartState: TouchStartState,
-  }) => { onTouchMove?: EventHandler; onTouchStart?: EventHandler };
+  makeHandlers?: (
+    optionsArgument: PinchPanOptionsArgument
+  ) => {
+    onTouchMove?: EventHandler;
+    onTouchStart?: EventHandler;
+  };
 }
 
 export default function usePinchPan(
@@ -51,18 +58,26 @@ export default function usePinchPan(
   { makeHandlers = () => ({}) }: PinchPanOptions = {}
 ): void {
   useLayoutEffect(() => {
-    const element = elementRef.current;
-    function applyTransform(translateXY, scaleFactor) {
+    const element = elementRef.current as NonNullable<
+      typeof elementRef.current
+    >;
+    if (!element) {
+      console.warn(
+        "usePinchPan() expected to receive a ref to an HTMLElement, but got an empty ref"
+      );
+      return;
+    }
+    function applyTransform(translateXY: XY, scaleFactor: number): void {
       element.style.transform = `translate(${translateXY[0]}px, ${translateXY[1]}px) scale(${scaleFactor})`;
     }
-    function applyTransformOrigin(transformOriginXY) {
+    function applyTransformOrigin(transformOriginXY: XY): void {
       element.style.transformOrigin = `${transformOriginXY[0]}px ${transformOriginXY[1]}px`;
     }
     // Values updated from the touch start handler
     const touchStartState: TouchStartState = {
-      middleXY: null,
-      distance: null,
-      clientRect: null,
+      middleXY: [0, 0],
+      distance: 0,
+      clientRect: undefined,
       translateXY: [0, 0],
       scaleFactor: 1,
       scalingOffset: [0, 0],

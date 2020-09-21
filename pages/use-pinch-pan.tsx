@@ -1,8 +1,5 @@
 import { FC } from "react";
-import Carousel from "../examples/Carousel";
-import styles from "./simple-carousel.module.css";
 import Head from "next/head";
-import Demo from "../components/Demo";
 import { promises as fs } from "fs";
 import highlight from "../utils/highlight";
 import Code from "../components/Code";

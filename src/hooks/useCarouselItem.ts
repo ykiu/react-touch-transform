@@ -1,4 +1,7 @@
-import usePinchPan, { EventHandler } from "./usePinchPan";
+import usePinchPan, {
+  EventHandler,
+  PinchPanOptionsArgument,
+} from "./usePinchPan";
 import { mulXY, divXY, subXY, addXY, getDistance, XY } from "../utils";
 import { RefObject } from "react";
 
@@ -56,22 +59,25 @@ export default function useCarouselItem(
     onXYSnap,
   }: CarouselItemOptions
 ): void {
-  const makeHandlers = ({ touchStartState, touchMoveState }) => {
+  const makeHandlers = ({
+    touchStartState,
+    touchMoveState,
+  }: PinchPanOptionsArgument) => {
     const extraTouchMoveState: CarouselItemMoveState = {
       offsetTopLeft: [0, 0],
       offsetBottomRight: [0, 0],
 
       // Hysteresis values
       translateXY: [0, 0],
-      timeStamp: null,
-      prevTimeStamp: null,
+      timeStamp: undefined,
+      prevTimeStamp: undefined,
       prevTranslateXY: [0, 0],
 
       // Axis locking
       activeAxis: "any",
     };
 
-    function handleTouchStart(event): false | void {
+    function handleTouchStart(event: TouchEvent): false | void {
       if (onTouchStart(event) === false || event.touches.length) {
         return;
       }
@@ -84,10 +90,12 @@ export default function useCarouselItem(
         prevTranslateXY,
       } = extraTouchMoveState;
       const { translateXY, scaleFactor } = touchMoveState;
-      const {
-        clientRect: { width },
-        scaleFactor: startScaleFactor,
-      } = touchStartState;
+      const { clientRect, scaleFactor: startScaleFactor } = touchStartState;
+
+      if (!clientRect || !timeStamp || !prevTimeStamp) {
+        return;
+      }
+      const { width } = clientRect;
 
       if (scaleFactor < 1) {
         touchStartState.scaleFactor = 1;
@@ -143,13 +151,18 @@ export default function useCarouselItem(
         onXYSnap();
       }
     }
-    function handleTouchMove(event): void {
+    function handleTouchMove(event: TouchEvent): void {
       const { translateXY, scaleFactor } = touchMoveState;
       const {
         transformOriginXY,
         scaleFactor: startScaleFactor,
-        clientRect: { width, height },
+        clientRect,
       } = touchStartState;
+      if (!clientRect) {
+        return;
+      }
+      const { width, height } = clientRect;
+
       const {
         timeStamp: prevTimeStamp,
         translateXY: prevTranslateXY,

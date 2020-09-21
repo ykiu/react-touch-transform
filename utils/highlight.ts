@@ -1,15 +1,13 @@
 import styles from "./highlight.module.css";
+import * as ts from "typescript/lib/typescript";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ts = require("typescript");
-
-function toHtml(sourceFile, node = sourceFile) {
+function toHtml(sourceFile: ts.SourceFile, node: ts.Node = sourceFile): string {
   const children = node.getChildren();
   const className =
     styles[ts.SyntaxKind[node.kind]] || ts.SyntaxKind[node.kind];
   if (children.length) {
     return `<span class="${className}">${children
-      .map((c) => toHtml(sourceFile, c))
+      .map((child) => toHtml(sourceFile, child))
       .join("")}</span>`;
   } else {
     return `<span class="${className}">${node
