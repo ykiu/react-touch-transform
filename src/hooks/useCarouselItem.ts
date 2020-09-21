@@ -1,7 +1,4 @@
-import usePinchPan, {
-  EventHandler,
-  PinchPanOptionsArgument,
-} from "./usePinchPan";
+import usePinchPan, { EventHandler, PinchPanState } from "./usePinchPan";
 import { mulXY, divXY, subXY, addXY, getDistance, XY } from "../utils";
 import { RefObject } from "react";
 
@@ -25,16 +22,7 @@ function deriveAxis(
   return Math.abs(translateXY[0]) > Math.abs(translateXY[1]) ? "x" : "y";
 }
 
-export interface CarouselItemOptions {
-  onTouchStart: EventHandler;
-  onLeft: () => void;
-  onRight: () => void;
-  onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
-  onScaleSnap: () => void;
-  onXYSnap: () => void;
-}
-
-interface CarouselItemMoveState {
+export interface CarouselItemTouchMoveState {
   offsetTopLeft: XY;
   offsetBottomRight: XY;
 
@@ -48,22 +36,27 @@ interface CarouselItemMoveState {
   activeAxis: Axis;
 }
 
+export interface CarouselItemState extends PinchPanState {
+  carouselItemTouchMoveState: CarouselItemTouchMoveState;
+}
+
+export interface CarouselItemOptions {
+  onTouchStart: EventHandler;
+  onLeft: () => void;
+  onRight: () => void;
+  onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
+  onScaleSnap: () => void;
+  onXYSnap: () => void;
+}
+
 export default function useCarouselItem(
   ref: RefObject<HTMLElement>,
-  {
-    onTouchStart,
-    onLeft,
-    onRight,
-    onOffset,
-    onScaleSnap,
-    onXYSnap,
-  }: CarouselItemOptions
+  options:
+    | CarouselItemOptions
+    | ((state: CarouselItemState) => CarouselItemOptions)
 ): void {
-  const makeHandlers = ({
-    touchStartState,
-    touchMoveState,
-  }: PinchPanOptionsArgument) => {
-    const extraTouchMoveState: CarouselItemMoveState = {
+  usePinchPan(ref, ({ touchStartState, touchMoveState }) => {
+    const carouselItemTouchMoveState: CarouselItemTouchMoveState = {
       offsetTopLeft: [0, 0],
       offsetBottomRight: [0, 0],
 
@@ -77,6 +70,15 @@ export default function useCarouselItem(
       activeAxis: "any",
     };
 
+    const { onTouchStart, onLeft, onRight, onOffset, onScaleSnap, onXYSnap } =
+      typeof options === "function"
+        ? options({
+            touchStartState,
+            touchMoveState,
+            carouselItemTouchMoveState,
+          })
+        : options;
+
     function handleTouchStart(event: TouchEvent): false | void {
       if (onTouchStart(event) === false || event.touches.length) {
         return;
@@ -88,7 +90,7 @@ export default function useCarouselItem(
         timeStamp,
         prevTimeStamp,
         prevTranslateXY,
-      } = extraTouchMoveState;
+      } = carouselItemTouchMoveState;
       const { translateXY, scaleFactor } = touchMoveState;
       const { clientRect, scaleFactor: startScaleFactor } = touchStartState;
 
@@ -167,7 +169,7 @@ export default function useCarouselItem(
         timeStamp: prevTimeStamp,
         translateXY: prevTranslateXY,
         activeAxis: prevActiveAxis,
-      } = extraTouchMoveState;
+      } = carouselItemTouchMoveState;
       const { timeStamp } = event;
 
       // Lock axis
@@ -191,15 +193,14 @@ export default function useCarouselItem(
 
       onOffset(offsetTopLeft, offsetBottomRight);
 
-      extraTouchMoveState.offsetTopLeft = offsetTopLeft;
-      extraTouchMoveState.offsetBottomRight = offsetBottomRight;
-      extraTouchMoveState.timeStamp = timeStamp;
-      extraTouchMoveState.prevTimeStamp = prevTimeStamp;
-      extraTouchMoveState.translateXY = translateXY;
-      extraTouchMoveState.prevTranslateXY = prevTranslateXY;
-      extraTouchMoveState.activeAxis = activeAxis;
+      carouselItemTouchMoveState.offsetTopLeft = offsetTopLeft;
+      carouselItemTouchMoveState.offsetBottomRight = offsetBottomRight;
+      carouselItemTouchMoveState.timeStamp = timeStamp;
+      carouselItemTouchMoveState.prevTimeStamp = prevTimeStamp;
+      carouselItemTouchMoveState.translateXY = translateXY;
+      carouselItemTouchMoveState.prevTranslateXY = prevTranslateXY;
+      carouselItemTouchMoveState.activeAxis = activeAxis;
     }
     return { onTouchStart: handleTouchStart, onTouchMove: handleTouchMove };
-  };
-  usePinchPan(ref, { makeHandlers });
+  });
 }

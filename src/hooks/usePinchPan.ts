@@ -39,23 +39,19 @@ export interface TouchMoveState {
   translateXY: XY;
 }
 
-export interface PinchPanOptionsArgument {
+export interface PinchPanState {
   touchMoveState: TouchMoveState;
   touchStartState: TouchStartState;
 }
 
 export interface PinchPanOptions {
-  makeHandlers?: (
-    optionsArgument: PinchPanOptionsArgument
-  ) => {
-    onTouchMove?: EventHandler;
-    onTouchStart?: EventHandler;
-  };
+  onTouchMove?: EventHandler;
+  onTouchStart?: EventHandler;
 }
 
 export default function usePinchPan(
   elementRef: RefObject<HTMLElement>,
-  { makeHandlers = () => ({}) }: PinchPanOptions = {}
+  options: PinchPanOptions | ((state: PinchPanState) => PinchPanOptions) = {}
 ): void {
   useLayoutEffect(() => {
     const element = elementRef.current as NonNullable<
@@ -93,10 +89,13 @@ export default function usePinchPan(
     const {
       onTouchStart = mutateStateDefault.onTouchStart,
       onTouchMove = mutateStateDefault.onTouchMove,
-    } = makeHandlers({
-      touchStartState,
-      touchMoveState,
-    });
+    } =
+      typeof options === "function"
+        ? options({
+            touchStartState,
+            touchMoveState,
+          })
+        : options;
 
     function handleTouchMove(event: TouchEvent) {
       preventDefault(event);
@@ -202,5 +201,5 @@ export default function usePinchPan(
       element.removeEventListener("touchmove", handleTouchMove);
       element.removeEventListener("touchend", handleTouchStart);
     };
-  }, [elementRef, makeHandlers]);
+  }, [elementRef, options]);
 }
