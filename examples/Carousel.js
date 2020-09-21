@@ -51,12 +51,7 @@ const scaleSnapTransition = transitionRefElement(
   { transition: null }
 );
 
-// eslint-disable-next-line react/prop-types
-export default function Carousel({ className }) {
-  const [index, setIndex] = useState(1);
-  const prev = useRef(null);
-  const current = useRef(null);
-  const next = useRef(null);
+function useCarouselContainer({ value, onChange, prev, current, next }) {
   const prevTerminateTransition = useRef(noop);
   const currentTerminateTransition = useRef(noop);
   const nextTerminateTransition = useRef(noop);
@@ -85,16 +80,17 @@ export default function Carousel({ className }) {
     translateRefElement(next, 0, 100);
   }
 
-  function handleShift(v) {
+  function handleShift(deltaValue) {
     shiftTransition(prev, prevTerminateTransition);
     shiftTransition(current, currentTerminateTransition);
     shiftTransition(next, nextTerminateTransition);
-    setIndex((currentIndex) => {
-      if ((!prev.current && v < 0) || (!next.current && v > 0)) {
-        return currentIndex;
-      }
-      return currentIndex + v;
-    });
+    if (
+      (!prev.current && deltaValue < 0) ||
+      (!next.current && deltaValue > 0)
+    ) {
+      return;
+    }
+    onChange(value + deltaValue);
   }
 
   function handleTouchStart() {
@@ -107,8 +103,37 @@ export default function Carousel({ className }) {
     translateRefElement(prev, 0, -100);
     translateRefElement(current, 0, 0);
     translateRefElement(next, 0, 100);
-  }, [index]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
+  return {
+    handleOffset,
+    handleScaleSnap,
+    handleShift,
+    handleTouchStart,
+    handleXYSnap,
+  };
+}
+
+// eslint-disable-next-line react/prop-types
+export default function Carousel({ className }) {
+  const [index, setIndex] = useState(1);
+  const prev = useRef(null);
+  const current = useRef(null);
+  const next = useRef(null);
+  const {
+    handleOffset,
+    handleShift,
+    handleScaleSnap,
+    handleXYSnap,
+    handleTouchStart,
+  } = useCarouselContainer({
+    value: index,
+    onChange: setIndex,
+    prev,
+    current,
+    next,
+  });
   return (
     <div className={clsx(styles.root, className)}>
       <div className={styles.carousel}>
