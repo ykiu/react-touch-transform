@@ -29,11 +29,11 @@ const SimpleCarousel: FC<SimpleCarouselProps> = ({ code }) => {
         <title>Simple Carousel</title>
       </Head>
       <h1>Simple Carousel</h1>
-      <p>A simple but full-fledged carousel component.</p>
       <p>
-        Implement a beautiful carousel with the <code>useCarousel()</code> react
-        hook.
+        Implement a carousel with <code>useCarouselItem()</code> and{" "}
+        <code>useCarouselContainer()</code>.
       </p>
+      <p>Note: the demo works only on touch devices.</p>
       <Demo className={styles.demo}>
         <Carousel className={styles.carousel} />
       </Demo>
