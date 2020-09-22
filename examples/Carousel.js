@@ -12,11 +12,11 @@ const urls = [
   "https://storage.googleapis.com/species.appspot.com/CACHE/images/observation_photos/jCURAWhRo6zh/2a248cf665fc2d493ee966e39189c1a3.jpg",
 ];
 
-function translateRefElement(ref, px, percent) {
+function styleRefElement(ref, style) {
   if (!ref.current) {
     return;
   }
-  ref.current.style.transform = `translateX(calc(${px}px + ${percent}%))`;
+  Object.assign(ref.current.style, style);
 }
 
 const transitionRefElement = (transitionStyle, endStyle) => (
@@ -51,33 +51,51 @@ const scaleSnapTransition = transitionRefElement(
   { transition: null }
 );
 
-function useCarouselContainer({ value, onChange, prev, current, next }) {
+function prevElementStyle(offsetTopLeft) {
+  return { transform: `translateX(calc(${offsetTopLeft[0]}px - 100%))` };
+}
+
+const prevElementStyleCleanUp = { transform: null };
+
+function nextElementStyle(offsetTopLeft, offsetBottomRight) {
+  return { transform: `translateX(calc(${offsetBottomRight[0]}px + 100%))` };
+}
+
+const nextElementStyleCleanUp = { transform: null };
+
+function useCarouselContainer({
+  value,
+  onChange,
+  prev,
+  current,
+  next,
+  prevElementStyle,
+  prevElementStyleCleanUp,
+  nextElementStyle,
+  nextElementStyleCleanUp,
+}) {
   const prevTerminateTransition = useRef(noop);
   const currentTerminateTransition = useRef(noop);
   const nextTerminateTransition = useRef(noop);
   function handleOffset(offsetTopLeft, offsetBottomRight) {
-    if (offsetTopLeft[0] > 0) {
-      translateRefElement(prev, offsetTopLeft[0], -100);
-    }
-    if (offsetBottomRight[0] < 0) {
-      translateRefElement(next, offsetBottomRight[0], 100);
-    }
+    styleRefElement(prev, prevElementStyle(offsetTopLeft, offsetBottomRight));
+    styleRefElement(next, nextElementStyle(offsetTopLeft, offsetBottomRight));
   }
 
   function handleScaleSnap() {
     scaleSnapTransition(prev, prevTerminateTransition);
     scaleSnapTransition(current, currentTerminateTransition);
     scaleSnapTransition(next, nextTerminateTransition);
-    translateRefElement(prev, 0, -100);
-    translateRefElement(next, 0, 100);
+    styleRefElement(prev, prevElementStyle([0, 0], [0, 0]));
+    styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
   }
 
   function handleXYSnap() {
     shiftTransition(prev, prevTerminateTransition);
     shiftTransition(current, currentTerminateTransition);
     shiftTransition(next, nextTerminateTransition);
-    translateRefElement(prev, 0, -100);
-    translateRefElement(next, 0, 100);
+    styleRefElement(prev, prevElementStyle([0, 0], [0, 0]));
+    styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
   }
 
   function handleShift(deltaValue) {
@@ -100,9 +118,16 @@ function useCarouselContainer({ value, onChange, prev, current, next }) {
   }
 
   useLayoutEffect(() => {
-    translateRefElement(prev, 0, -100);
-    translateRefElement(current, 0, 0);
-    translateRefElement(next, 0, 100);
+    styleRefElement(prev, prevElementStyle([0, 0], [0, 0]));
+    styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
+    const prevElement = prev.current;
+    const nextElement = next.current;
+    return () => {
+      if (prevElement)
+        Object.assign(prevElement.style, prevElementStyleCleanUp);
+      if (nextElement)
+        Object.assign(nextElement.style, nextElementStyleCleanUp);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
@@ -117,7 +142,7 @@ function useCarouselContainer({ value, onChange, prev, current, next }) {
 
 // eslint-disable-next-line react/prop-types
 export default function Carousel({ className }) {
-  const [index, setIndex] = useState(1);
+  const [value, setValue] = useState(0);
   const prev = useRef(null);
   const current = useRef(null);
   const next = useRef(null);
@@ -128,35 +153,40 @@ export default function Carousel({ className }) {
     handleXYSnap,
     handleTouchStart,
   } = useCarouselContainer({
-    value: index,
-    onChange: setIndex,
+    value,
+    onChange: setValue,
     prev,
     current,
     next,
+    prevElementStyle,
+    prevElementStyleCleanUp,
+    nextElementStyle,
+    nextElementStyleCleanUp,
   });
   return (
     <div className={clsx(styles.root, className)}>
       <div className={styles.carousel}>
-        {[null, ...urls, null]
-          .slice(index - 1, index + 2)
-          .map((url, i, arr) => {
-            return (
-              url && (
-                <CarouselItem
-                  key={url}
-                  ref={[prev, current, next][i]}
-                  url={url}
-                  onOffset={handleOffset}
-                  onLeft={arr[i - 1] == null ? null : () => handleShift(-1)}
-                  onRight={arr[i + 1] == null ? null : () => handleShift(1)}
-                  onScaleSnap={handleScaleSnap}
-                  onXYSnap={handleXYSnap}
-                  onTouchStart={handleTouchStart}
-                  className={i === 1 ? null : "image-prevnext"}
-                />
-              )
-            );
-          })}
+        {[prev, current, next].map((ref, i) => {
+          const urlIndex = value + i - 1;
+          const url = urls[urlIndex];
+          const isFirst = urlIndex === 0;
+          const isLast = urlIndex === urls.length - 1;
+          return (
+            url && (
+              <CarouselItem
+                key={url}
+                ref={ref}
+                url={url}
+                onOffset={handleOffset}
+                onLeft={isFirst ? null : () => handleShift(-1)}
+                onRight={isLast ? null : () => handleShift(1)}
+                onScaleSnap={handleScaleSnap}
+                onXYSnap={handleXYSnap}
+                onTouchStart={handleTouchStart}
+              />
+            )
+          );
+        })}
       </div>
     </div>
   );
