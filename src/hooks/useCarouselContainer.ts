@@ -50,8 +50,8 @@ const scaleSnapTransition = transitionRefElement(
   { transition: undefined }
 );
 
-export interface CarouselContainerOptions<T> {
-  value: T;
+export interface CarouselContainerOptions {
+  value: unknown;
   onSwipe: (direction: "left" | "right") => void;
   prevElementStyle: (
     offsetTopLeft: XY,
@@ -68,23 +68,21 @@ export interface CarouselContainerOptions<T> {
 export interface CarouselContainerUtils {
   onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
   onScaleSnap: () => void;
-  onSwipeHoriz: (direction: "left" | "right") => void;
   onTouchStart: () => void;
   onXYSnap: () => void;
 }
 
-export default function useCarouselContainer<T>(
+export default function useCarouselContainer(
   prev: RefObject<HTMLElement>,
   current: RefObject<HTMLElement>,
   next: RefObject<HTMLElement>,
   {
     value,
-    onSwipe,
     prevElementStyle,
     prevElementStyleCleanUp,
     nextElementStyle,
     nextElementStyleCleanUp,
-  }: CarouselContainerOptions<T>
+  }: CarouselContainerOptions
 ): CarouselContainerUtils {
   const prevTerminateTransition = useRef(noop);
   const currentTerminateTransition = useRef(noop);
@@ -110,13 +108,6 @@ export default function useCarouselContainer<T>(
     styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
   }
 
-  function handleSwipeHoriz(direction: "left" | "right") {
-    shiftTransition(prev, prevTerminateTransition);
-    shiftTransition(current, currentTerminateTransition);
-    shiftTransition(next, nextTerminateTransition);
-    onSwipe(direction);
-  }
-
   function handleTouchStart() {
     prevTerminateTransition.current();
     currentTerminateTransition.current();
@@ -124,6 +115,9 @@ export default function useCarouselContainer<T>(
   }
 
   useLayoutEffect(() => {
+    shiftTransition(prev, prevTerminateTransition);
+    shiftTransition(current, currentTerminateTransition);
+    shiftTransition(next, nextTerminateTransition);
     styleRefElement(prev, prevElementStyle([0, 0], [0, 0]));
     styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
     const prevElement = prev.current;
@@ -140,7 +134,6 @@ export default function useCarouselContainer<T>(
   return {
     onOffset: handleOffset,
     onScaleSnap: handleScaleSnap,
-    onSwipeHoriz: handleSwipeHoriz,
     onTouchStart: handleTouchStart,
     onXYSnap: handleXYSnap,
   };

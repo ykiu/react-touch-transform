@@ -30,17 +30,15 @@ export default function Carousel({ className }) {
   const prev = useRef(null);
   const current = useRef(null);
   const next = useRef(null);
-  const onSwipe = (direction) =>
+  const onSwipeHoriz = (direction) =>
     setValue((value) => value + (direction === "left" ? -1 : 1));
   const {
     onOffset,
-    onSwipeHoriz,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
   } = useCarouselContainer(prev, current, next, {
     value,
-    onSwipe,
     prevElementStyle,
     prevElementStyleCleanUp,
     nextElementStyle,
