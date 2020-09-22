@@ -9,8 +9,9 @@ export default React.forwardRef(function CarouselItem(
     url,
     className,
     onOffset,
-    onLeft,
-    onRight,
+    onSwipeHoriz,
+    disableSwipeLeft,
+    disableSwipeRight,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
@@ -19,8 +20,9 @@ export default React.forwardRef(function CarouselItem(
 ) {
   useCarouselItem(ref, {
     onOffset,
-    onLeft,
-    onRight,
+    onSwipeHoriz,
+    disableSwipeLeft,
+    disableSwipeRight,
     onScaleSnap,
     onXYSnap,
     onTouchStart,

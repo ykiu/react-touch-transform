@@ -98,16 +98,11 @@ function useCarouselContainer({
     styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
   }
 
-  function handleShift(deltaValue) {
+  function handleSwipeHoriz(direction) {
     shiftTransition(prev, prevTerminateTransition);
     shiftTransition(current, currentTerminateTransition);
     shiftTransition(next, nextTerminateTransition);
-    if (
-      (!prev.current && deltaValue < 0) ||
-      (!next.current && deltaValue > 0)
-    ) {
-      return;
-    }
+    const deltaValue = direction === "left" ? -1 : 1;
     onChange(value + deltaValue);
   }
 
@@ -134,7 +129,7 @@ function useCarouselContainer({
   return {
     handleOffset,
     handleScaleSnap,
-    handleShift,
+    handleSwipeHoriz,
     handleTouchStart,
     handleXYSnap,
   };
@@ -148,7 +143,7 @@ export default function Carousel({ className }) {
   const next = useRef(null);
   const {
     handleOffset,
-    handleShift,
+    handleSwipeHoriz,
     handleScaleSnap,
     handleXYSnap,
     handleTouchStart,
@@ -178,8 +173,9 @@ export default function Carousel({ className }) {
                 ref={ref}
                 url={url}
                 onOffset={handleOffset}
-                onLeft={isFirst ? null : () => handleShift(-1)}
-                onRight={isLast ? null : () => handleShift(1)}
+                onSwipeHoriz={handleSwipeHoriz}
+                disableSwipeLeft={isFirst}
+                disableSwipeRight={isLast}
                 onScaleSnap={handleScaleSnap}
                 onXYSnap={handleXYSnap}
                 onTouchStart={handleTouchStart}

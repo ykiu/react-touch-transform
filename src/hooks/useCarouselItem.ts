@@ -42,8 +42,9 @@ export interface CarouselItemState extends PinchPanState {
 
 export interface CarouselItemOptions {
   onTouchStart: EventHandler;
-  onLeft: () => void;
-  onRight: () => void;
+  onSwipeHoriz: (direction: "left" | "right") => void;
+  disableSwipeLeft: boolean;
+  disableSwipeRight: boolean;
   onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
   onScaleSnap: () => void;
   onXYSnap: () => void;
@@ -70,7 +71,15 @@ export default function useCarouselItem(
       activeAxis: "any",
     };
 
-    const { onTouchStart, onLeft, onRight, onOffset, onScaleSnap, onXYSnap } =
+    const {
+      onTouchStart,
+      onSwipeHoriz,
+      disableSwipeLeft,
+      disableSwipeRight,
+      onOffset,
+      onScaleSnap,
+      onXYSnap,
+    } =
       typeof options === "function"
         ? options({
             touchStartState,
@@ -112,25 +121,27 @@ export default function useCarouselItem(
         (translateXY[0] - prevTranslateXY[0]) / (timeStamp - prevTimeStamp);
       const thresholdWidth = (width / startScaleFactor) * 0.5;
 
-      if (
-        onLeft &&
-        (offsetTopLeft[0] > thresholdWidth ||
-          (scaleFactor === 1 &&
-            offsetTopLeft[0] > 0 &&
-            velocity > VELOCITY_THRESHOLD))
-      ) {
-        onLeft();
-        return false;
-      }
-      if (
-        onRight &&
-        (offsetBottomRight[0] < -thresholdWidth ||
-          (scaleFactor === 1 &&
-            offsetBottomRight[0] < 0 &&
-            velocity < -VELOCITY_THRESHOLD))
-      ) {
-        onRight();
-        return false;
+      if (onSwipeHoriz) {
+        if (
+          !disableSwipeLeft &&
+          (offsetTopLeft[0] > thresholdWidth ||
+            (scaleFactor === 1 &&
+              offsetTopLeft[0] > 0 &&
+              velocity > VELOCITY_THRESHOLD))
+        ) {
+          onSwipeHoriz("left");
+          return false;
+        }
+        if (
+          !disableSwipeRight &&
+          (offsetBottomRight[0] < -thresholdWidth ||
+            (scaleFactor === 1 &&
+              offsetBottomRight[0] < 0 &&
+              velocity < -VELOCITY_THRESHOLD))
+        ) {
+          onSwipeHoriz("right");
+          return false;
+        }
       }
       let xySnapped = false;
       if (offsetTopLeft[0] > 0) {
