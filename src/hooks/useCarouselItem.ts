@@ -160,6 +160,8 @@ export default function useCarouselItem(
       }
       if (xySnapped) {
         onXYSnap();
+        carouselItemTouchMoveState.offsetTopLeft = [0, 0];
+        carouselItemTouchMoveState.offsetBottomRight = [0, 0];
       }
     }
     function handleTouchMove(event: TouchEvent): void {
