@@ -121,23 +121,21 @@ export default function useCarouselItem(
         (translateXY[0] - prevTranslateXY[0]) / (timeStamp - prevTimeStamp);
       const thresholdWidth = (width / startScaleFactor) * 0.5;
 
+      function shouldSwipe(position: number, velocity: number): boolean {
+        return (
+          position > thresholdWidth ||
+          (scaleFactor === 1 && position > 0 && velocity > VELOCITY_THRESHOLD)
+        );
+      }
+
       if (onSwipeHoriz) {
-        if (
-          !disableSwipeLeft &&
-          (offsetTopLeft[0] > thresholdWidth ||
-            (scaleFactor === 1 &&
-              offsetTopLeft[0] > 0 &&
-              velocity > VELOCITY_THRESHOLD))
-        ) {
+        if (!disableSwipeLeft && shouldSwipe(offsetTopLeft[0], velocity)) {
           onSwipeHoriz("left");
           return false;
         }
         if (
           !disableSwipeRight &&
-          (offsetBottomRight[0] < -thresholdWidth ||
-            (scaleFactor === 1 &&
-              offsetBottomRight[0] < 0 &&
-              velocity < -VELOCITY_THRESHOLD))
+          shouldSwipe(-offsetBottomRight[0], -velocity)
         ) {
           onSwipeHoriz("right");
           return false;
