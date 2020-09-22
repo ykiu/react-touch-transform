@@ -16,7 +16,7 @@ const transitionRefElement = (
   endStyle: Partial<CSSStyleDeclaration>
 ) => (
   { current: element }: RefObject<HTMLElement>,
-  terminateTransitionRef: RefObject<() => void>
+  terminateTransitionRef: MutableRefObject<() => void>
 ) => {
   if (!element) {
     return;
@@ -26,14 +26,10 @@ const transitionRefElement = (
   const terminate = () => {
     Object.assign(style, endStyle);
     element.removeEventListener("transitionend", terminate);
-    (terminateTransitionRef as MutableRefObject<
-      typeof terminateTransitionRef.current
-    >).current = noop;
+    terminateTransitionRef.current = noop;
   };
   element.addEventListener("transitionend", terminate);
-  (terminateTransitionRef as MutableRefObject<
-    typeof terminateTransitionRef.current
-  >).current = terminate;
+  terminateTransitionRef.current = terminate;
 };
 
 function createTransition(ms: number): string {
