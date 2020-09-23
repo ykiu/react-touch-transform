@@ -10,8 +10,8 @@ import {
 } from "../utils";
 import { RefObject } from "react";
 
-const VELOCITY_THRESHOLD = 0.5;
-const AXIS_LOCK_THRESHOLD = 20;
+const VELOCITY_THRESHOLD = 0.1;
+const AXIS_LOCK_THRESHOLD = 5;
 const DOUBLE_TAP_MOVEMENT_THRESHOLD = 10;
 const DOUBLE_TAP_INTERVAL_THRESHOLD = 500;
 
