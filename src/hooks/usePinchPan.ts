@@ -1,9 +1,14 @@
 import { RefObject, useLayoutEffect } from "react";
-import { addXY, divXY, getDistance, mulXY, noop, subXY, XY } from "../utils";
-
-function touchToXY(touch: Touch): XY {
-  return [touch.clientX, touch.clientY];
-}
+import {
+  addXY,
+  divXY,
+  getDistance,
+  mulXY,
+  noop,
+  subXY,
+  touchToXY,
+  XY,
+} from "../utils";
 
 function getMiddleXY(xy1: XY, xy2: XY): XY {
   return [(xy1[0] + xy2[0]) / 2, (xy1[1] + xy2[1]) / 2];

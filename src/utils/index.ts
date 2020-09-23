@@ -1,5 +1,9 @@
 export type XY = [number, number];
 
+export function touchToXY(touch: Touch): XY {
+  return [touch.clientX, touch.clientY];
+}
+
 export function subXY(xy1: XY, xy2: XY): XY {
   return [xy1[0] - xy2[0], xy1[1] - xy2[1]];
 }
