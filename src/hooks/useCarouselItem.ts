@@ -1,9 +1,19 @@
 import usePinchPan, { EventHandler, PinchPanState } from "./usePinchPan";
-import { mulXY, divXY, subXY, addXY, getDistance, XY } from "../utils";
+import {
+  mulXY,
+  divXY,
+  subXY,
+  addXY,
+  getDistance,
+  XY,
+  touchToXY,
+} from "../utils";
 import { RefObject } from "react";
 
 const VELOCITY_THRESHOLD = 0.5;
 const AXIS_LOCK_THRESHOLD = 20;
+const DOUBLE_TAP_MOVEMENT_THRESHOLD = 10;
+const DOUBLE_TAP_INTERVAL_THRESHOLD = 500;
 
 type Axis = "x" | "y" | "any";
 
@@ -22,6 +32,30 @@ function deriveAxis(
   return Math.abs(translateXY[0]) > Math.abs(translateXY[1]) ? "x" : "y";
 }
 
+function deriveDoubleTapXY(event: TouchEvent): XY | undefined {
+  if (event.touches.length === 1) {
+    return touchToXY(event.touches[0]);
+  }
+  return undefined;
+}
+
+function detectDoubleTap(
+  event: TouchEvent,
+  doubletapXY: XY,
+  doubletapTimeStamp: number
+) {
+  if (
+    getDistance(touchToXY(event.changedTouches[0]), doubletapXY) >
+    DOUBLE_TAP_MOVEMENT_THRESHOLD
+  ) {
+    return false;
+  }
+  if (event.timeStamp - doubletapTimeStamp > DOUBLE_TAP_INTERVAL_THRESHOLD) {
+    return false;
+  }
+  return true;
+}
+
 export interface CarouselItemTouchMoveState {
   offsetTopLeft: XY;
   offsetBottomRight: XY;
@@ -34,6 +68,11 @@ export interface CarouselItemTouchMoveState {
 
   // Axis locking
   activeAxis: Axis;
+}
+
+export interface CarouselItemTouchStartState {
+  doubletapXY?: XY;
+  doubletapTimeStamp: number;
 }
 
 export interface CarouselItemState extends PinchPanState {
@@ -71,6 +110,11 @@ export default function useCarouselItem(
       activeAxis: "any",
     };
 
+    const carouselItemTouchStartState: CarouselItemTouchStartState = {
+      doubletapXY: undefined,
+      doubletapTimeStamp: -Infinity,
+    };
+
     const {
       onTouchStart,
       onSwipeHoriz,
@@ -89,10 +133,7 @@ export default function useCarouselItem(
         : options;
 
     function handleTouchStart(event: TouchEvent): false | void {
-      if (onTouchStart(event) === false || event.touches.length) {
-        return;
-      }
-
+      const { doubletapTimeStamp, doubletapXY } = carouselItemTouchStartState;
       const {
         offsetTopLeft,
         offsetBottomRight,
@@ -103,6 +144,24 @@ export default function useCarouselItem(
       const { translateXY, scaleFactor } = touchMoveState;
       const { clientRect, scaleFactor: startScaleFactor } = touchStartState;
 
+      if (event.type === "touchstart") {
+        carouselItemTouchStartState.doubletapXY = deriveDoubleTapXY(event);
+      } else if (doubletapXY && event.touches.length === 0) {
+        // assuming touchend
+        if (detectDoubleTap(event, doubletapXY, doubletapTimeStamp)) {
+          touchStartState.scaleFactor = scaleFactor < 1.5 ? 2 : 1;
+          touchStartState.translateXY = [0, 0];
+          onScaleSnap();
+          return;
+        } else {
+          carouselItemTouchStartState.doubletapTimeStamp = event.timeStamp;
+        }
+      }
+
+      if (onTouchStart(event) === false || event.touches.length) {
+        return;
+      }
+
       if (!clientRect || !timeStamp || !prevTimeStamp) {
         return;
       }
@@ -110,9 +169,7 @@ export default function useCarouselItem(
 
       if (scaleFactor < 1) {
         touchStartState.scaleFactor = 1;
-        touchMoveState.scaleFactor = 1;
         touchStartState.translateXY = [0, 0];
-        touchMoveState.translateXY = [0, 0];
         onScaleSnap();
         return;
       }
