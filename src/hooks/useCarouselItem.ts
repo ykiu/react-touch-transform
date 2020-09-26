@@ -87,6 +87,8 @@ export interface CarouselItemTouchMoveState {
 export interface CarouselItemTouchStartState {
   doubletapXY?: XY;
   doubletapTimeStamp: number;
+  offsetTopLeft: XY;
+  offsetBottomRight: XY;
 }
 
 export interface CarouselItemState extends PinchPanState {
@@ -127,6 +129,8 @@ export default function useCarouselItem(
     const carouselItemTouchStartState: CarouselItemTouchStartState = {
       doubletapXY: undefined,
       doubletapTimeStamp: -Infinity,
+      offsetTopLeft: [0, 0],
+      offsetBottomRight: [0, 0],
     };
 
     const {
@@ -147,7 +151,12 @@ export default function useCarouselItem(
         : options;
 
     function handleTouchStart(event: TouchEvent): false | void {
-      const { doubletapTimeStamp, doubletapXY } = carouselItemTouchStartState;
+      const {
+        doubletapTimeStamp,
+        doubletapXY,
+        offsetTopLeft: startOffsetTopLeft,
+        offsetBottomRight: startOffsetBottomRight,
+      } = carouselItemTouchStartState;
       const {
         offsetTopLeft,
         offsetBottomRight,
@@ -172,6 +181,9 @@ export default function useCarouselItem(
         }
       }
 
+      carouselItemTouchStartState.offsetTopLeft = offsetTopLeft;
+      carouselItemTouchStartState.offsetBottomRight = offsetBottomRight;
+
       if (onTouchStart(event) === false || event.touches.length) {
         return;
       }
@@ -192,21 +204,33 @@ export default function useCarouselItem(
         (translateXY[0] - prevTranslateXY[0]) / (timeStamp - prevTimeStamp);
       const thresholdWidth = (width / startScaleFactor) * 0.5;
 
-      function shouldSwipe(position: number, velocity: number): boolean {
+      function shouldSwipe(
+        startPosition: number,
+        position: number,
+        velocity: number
+      ): boolean {
         return (
-          position > thresholdWidth ||
-          (scaleFactor === 1 && position > 0 && velocity > VELOCITY_THRESHOLD)
+          startPosition === 0 &&
+          (position > thresholdWidth ||
+            (position > 0 && velocity > VELOCITY_THRESHOLD))
         );
       }
 
       if (onSwipeHoriz) {
-        if (!disableSwipeLeft && shouldSwipe(offsetTopLeft[0], velocity)) {
+        if (
+          !disableSwipeLeft &&
+          shouldSwipe(startOffsetTopLeft[0], offsetTopLeft[0], velocity)
+        ) {
           onSwipeHoriz("left");
           return false;
         }
         if (
           !disableSwipeRight &&
-          shouldSwipe(-offsetBottomRight[0], -velocity)
+          shouldSwipe(
+            -startOffsetBottomRight[0],
+            -offsetBottomRight[0],
+            -velocity
+          )
         ) {
           onSwipeHoriz("right");
           return false;
@@ -216,23 +240,25 @@ export default function useCarouselItem(
       if (offsetTopLeft[0] > 0) {
         xySnapped = true;
         touchStartState.translateXY[0] -= offsetTopLeft[0];
+        carouselItemTouchMoveState.offsetTopLeft[0] = 0;
       }
       if (offsetTopLeft[1] > 0) {
         xySnapped = true;
         touchStartState.translateXY[1] -= offsetTopLeft[1];
+        carouselItemTouchMoveState.offsetTopLeft[1] = 0;
       }
       if (offsetBottomRight[0] < 0) {
         xySnapped = true;
         touchStartState.translateXY[0] -= offsetBottomRight[0];
+        carouselItemTouchMoveState.offsetBottomRight[0] = 0;
       }
       if (offsetBottomRight[1] < 0) {
         xySnapped = true;
         touchStartState.translateXY[1] -= offsetBottomRight[1];
+        carouselItemTouchMoveState.offsetBottomRight[1] = 0;
       }
       if (xySnapped) {
         onXYSnap();
-        carouselItemTouchMoveState.offsetTopLeft = [0, 0];
-        carouselItemTouchMoveState.offsetBottomRight = [0, 0];
       }
     }
     function handleTouchMove(event: TouchEvent): void {
