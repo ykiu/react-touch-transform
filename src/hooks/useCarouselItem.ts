@@ -32,6 +32,20 @@ function deriveAxis(
   return Math.abs(translateXY[0]) > Math.abs(translateXY[1]) ? "x" : "y";
 }
 
+function swapOrigin(xy: XY, dimensions: XY, scaleFactor: number) {
+  return subXY(xy, divXY(dimensions, scaleFactor));
+}
+
+function deriveOffset(
+  translateXY: XY,
+  transformOriginXY: XY,
+  scaleFactor: number
+): XY {
+  const scalingOffset = mulXY(transformOriginXY, 1 - scaleFactor);
+  const offset = addXY(translateXY, scalingOffset);
+  return offset;
+}
+
 function deriveDoubleTapXY(event: TouchEvent): XY | undefined {
   if (event.touches.length === 1) {
     return touchToXY(event.touches[0]);
@@ -248,16 +262,16 @@ export default function useCarouselItem(
         translateXY[0] = 0;
       }
 
-      // Derive scaling offset for each corner
-      const scalingOffsetTopLeft = mulXY(transformOriginXY, 1 - scaleFactor);
-      const scalingOffsetBottomRight = mulXY(
-        subXY(divXY([width, height], startScaleFactor), transformOriginXY),
-        scaleFactor - 1
+      const offsetTopLeft = deriveOffset(
+        translateXY,
+        transformOriginXY,
+        scaleFactor
       );
-
-      // Derive offset including translation for each corner
-      const offsetTopLeft = addXY(translateXY, scalingOffsetTopLeft);
-      const offsetBottomRight = addXY(translateXY, scalingOffsetBottomRight);
+      const offsetBottomRight = deriveOffset(
+        translateXY,
+        swapOrigin(transformOriginXY, [width, height], startScaleFactor),
+        scaleFactor
+      );
 
       onOffset(offsetTopLeft, offsetBottomRight);
 
