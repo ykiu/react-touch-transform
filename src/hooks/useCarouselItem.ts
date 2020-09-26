@@ -10,6 +10,7 @@ import {
 } from "../utils";
 import { RefObject } from "react";
 
+const { min, max } = Math;
 const VELOCITY_THRESHOLD = 0.1;
 const AXIS_LOCK_THRESHOLD = 5;
 const DOUBLE_TAP_MOVEMENT_THRESHOLD = 10;
@@ -44,6 +45,12 @@ function deriveOffset(
   const scalingOffset = mulXY(transformOriginXY, 1 - scaleFactor);
   const offset = addXY(translateXY, scalingOffset);
   return offset;
+}
+
+function deriveSnapDelta(offsetTopLeft: XY, offsetBottomRight: XY): XY {
+  const snapDeltaX = max(0, offsetTopLeft[0]) || min(0, offsetBottomRight[0]);
+  const snapDeltaY = max(0, offsetTopLeft[1]) || min(0, offsetBottomRight[1]);
+  return [snapDeltaX, snapDeltaY];
 }
 
 function deriveDoubleTapXY(event: TouchEvent): XY | undefined {
@@ -165,101 +172,99 @@ export default function useCarouselItem(
         prevTranslateXY,
       } = carouselItemTouchMoveState;
       const { translateXY, scaleFactor } = touchMoveState;
-      const { clientRect, scaleFactor: startScaleFactor } = touchStartState;
+      const {
+        clientRect,
+        scaleFactor: startScaleFactor,
+        translateXY: startTranslateXY,
+      } = touchStartState;
 
-      if (event.type === "touchstart") {
-        carouselItemTouchStartState.doubletapXY = deriveDoubleTapXY(event);
-      } else if (doubletapXY && event.touches.length === 0) {
-        // assuming touchend
-        if (detectDoubleTap(event, doubletapXY, doubletapTimeStamp)) {
-          touchStartState.scaleFactor = scaleFactor < 1.5 ? 2 : 1;
+      const returnValue = (() => {
+        if (event.type === "touchstart") {
+          carouselItemTouchStartState.doubletapXY = deriveDoubleTapXY(event);
+        } else if (doubletapXY && event.touches.length === 0) {
+          // assuming touchend
+          if (detectDoubleTap(event, doubletapXY, doubletapTimeStamp)) {
+            touchStartState.scaleFactor = scaleFactor < 1.5 ? 2 : 1;
+            touchStartState.translateXY = [0, 0];
+            onScaleSnap();
+            return;
+          } else {
+            carouselItemTouchStartState.doubletapTimeStamp = event.timeStamp;
+          }
+        }
+
+        if (onTouchStart(event) === false || event.touches.length) {
+          return;
+        }
+
+        if (!clientRect || !timeStamp || !prevTimeStamp) {
+          return;
+        }
+        const { width } = clientRect;
+
+        if (scaleFactor < 1) {
+          touchStartState.scaleFactor = 1;
           touchStartState.translateXY = [0, 0];
           onScaleSnap();
           return;
-        } else {
-          carouselItemTouchStartState.doubletapTimeStamp = event.timeStamp;
         }
-      }
 
-      carouselItemTouchStartState.offsetTopLeft = offsetTopLeft;
-      carouselItemTouchStartState.offsetBottomRight = offsetBottomRight;
+        const velocity =
+          (translateXY[0] - prevTranslateXY[0]) / (timeStamp - prevTimeStamp);
+        const thresholdWidth = (width / startScaleFactor) * 0.5;
 
-      if (onTouchStart(event) === false || event.touches.length) {
-        return;
-      }
+        const shouldSwipe = (
+          startPosition: number,
+          position: number,
+          velocity: number
+        ): boolean => {
+          return (
+            startPosition === 0 &&
+            (position > thresholdWidth ||
+              (position > 0 && velocity > VELOCITY_THRESHOLD))
+          );
+        };
 
-      if (!clientRect || !timeStamp || !prevTimeStamp) {
-        return;
-      }
-      const { width } = clientRect;
-
-      if (scaleFactor < 1) {
-        touchStartState.scaleFactor = 1;
-        touchStartState.translateXY = [0, 0];
-        onScaleSnap();
-        return;
-      }
-
-      const velocity =
-        (translateXY[0] - prevTranslateXY[0]) / (timeStamp - prevTimeStamp);
-      const thresholdWidth = (width / startScaleFactor) * 0.5;
-
-      function shouldSwipe(
-        startPosition: number,
-        position: number,
-        velocity: number
-      ): boolean {
-        return (
-          startPosition === 0 &&
-          (position > thresholdWidth ||
-            (position > 0 && velocity > VELOCITY_THRESHOLD))
+        if (onSwipeHoriz) {
+          if (
+            !disableSwipeLeft &&
+            shouldSwipe(startOffsetTopLeft[0], offsetTopLeft[0], velocity)
+          ) {
+            onSwipeHoriz("left");
+            return false;
+          }
+          if (
+            !disableSwipeRight &&
+            shouldSwipe(
+              -startOffsetBottomRight[0],
+              -offsetBottomRight[0],
+              -velocity
+            )
+          ) {
+            onSwipeHoriz("right");
+            return false;
+          }
+        }
+        const snapDelta = deriveSnapDelta(offsetTopLeft, offsetBottomRight);
+        touchStartState.translateXY = subXY(startTranslateXY, snapDelta);
+        carouselItemTouchStartState.offsetTopLeft = subXY(
+          offsetTopLeft,
+          snapDelta
         );
-      }
+        carouselItemTouchStartState.offsetBottomRight = subXY(
+          offsetBottomRight,
+          snapDelta
+        );
+        if (snapDelta[0] !== 0 || snapDelta[1] !== 0) {
+          onXYSnap();
+        }
+      })();
 
-      if (onSwipeHoriz) {
-        if (
-          !disableSwipeLeft &&
-          shouldSwipe(startOffsetTopLeft[0], offsetTopLeft[0], velocity)
-        ) {
-          onSwipeHoriz("left");
-          return false;
-        }
-        if (
-          !disableSwipeRight &&
-          shouldSwipe(
-            -startOffsetBottomRight[0],
-            -offsetBottomRight[0],
-            -velocity
-          )
-        ) {
-          onSwipeHoriz("right");
-          return false;
-        }
-      }
-      let xySnapped = false;
-      if (offsetTopLeft[0] > 0) {
-        xySnapped = true;
-        touchStartState.translateXY[0] -= offsetTopLeft[0];
-        carouselItemTouchMoveState.offsetTopLeft[0] = 0;
-      }
-      if (offsetTopLeft[1] > 0) {
-        xySnapped = true;
-        touchStartState.translateXY[1] -= offsetTopLeft[1];
-        carouselItemTouchMoveState.offsetTopLeft[1] = 0;
-      }
-      if (offsetBottomRight[0] < 0) {
-        xySnapped = true;
-        touchStartState.translateXY[0] -= offsetBottomRight[0];
-        carouselItemTouchMoveState.offsetBottomRight[0] = 0;
-      }
-      if (offsetBottomRight[1] < 0) {
-        xySnapped = true;
-        touchStartState.translateXY[1] -= offsetBottomRight[1];
-        carouselItemTouchMoveState.offsetBottomRight[1] = 0;
-      }
-      if (xySnapped) {
-        onXYSnap();
-      }
+      carouselItemTouchMoveState.offsetTopLeft =
+        carouselItemTouchStartState.offsetTopLeft;
+      carouselItemTouchMoveState.offsetBottomRight =
+        carouselItemTouchStartState.offsetBottomRight;
+      return returnValue;
     }
     function handleTouchMove(event: TouchEvent): void {
       const { translateXY, scaleFactor } = touchMoveState;
