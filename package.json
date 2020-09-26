@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build:doc": "next build",
     "start": "next start",
     "lint": "eslint --cache . --ext .js,.ts,.jsx,.tsx",
     "fmt": "eslint --cache . --ext .js,.ts,.jsx,.tsx --fix",
-    "typecheck": "tsc --project . --noEmit"
+    "typecheck": "tsc --project . --noEmit",
+    "build:cjs": "npx tsc --moduleResolution node --module CommonJS --declaration ./src/index.ts --outDir ./dist/cjs",
+    "build:esm": "npx tsc --moduleResolution node --module es6 --declaration ./src/index.ts --outDir ./dist/esm"
   },
   "dependencies": {},
   "devDependencies": {

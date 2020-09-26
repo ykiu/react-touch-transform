@@ -178,7 +178,7 @@ export default function useCarouselItem(
         translateXY: startTranslateXY,
       } = touchStartState;
 
-      const returnValue = (() => {
+      const returnValue = ((): false | undefined => {
         if (event.type === "touchstart") {
           carouselItemTouchStartState.doubletapXY = deriveDoubleTapXY(event);
         } else if (doubletapXY && event.touches.length === 0) {
