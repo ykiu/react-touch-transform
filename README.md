@@ -1,30 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# react-touch-transform
 
-## Getting Started
+CSS Transforms for touch gestures ⁽⁽👆⁾⁾
 
-First, run the development server:
+![Screen shot](public/images/carousel.gif)
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
+$ # clone the repo
+$ git clone <this project>
+$ cd <this project>
+$ 
+$ # install development dependencies
+$ npm i -D
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Scripts
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+#### Serve the document with the development server
 
-## Learn More
+Launch the document in the development mode to interact with the stuff inside the package:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+$ npm run doc:dev # lauches the development server on http://0.0.0.0:8000.
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Linting, formatting and type checking
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+$ npm run lint # linting
+$ npm run fmt # auto-formatting
+$ npm run typecheck # type checking
+```
 
-## Deploy on Vercel
+#### Build the package
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```bash
+$ npm run pkg:build # builds the package into both CommonJS and ES6 Modules.
+```

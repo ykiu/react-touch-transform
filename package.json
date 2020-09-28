@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build:doc": "next build",
-    "start": "next start",
     "lint": "eslint --cache . --ext .js,.ts,.jsx,.tsx",
     "fmt": "eslint --cache . --ext .js,.ts,.jsx,.tsx --fix",
     "typecheck": "tsc --project . --noEmit",
-    "build:cjs": "npx tsc --moduleResolution node --module CommonJS --declaration ./src/index.ts --outDir ./dist/cjs",
-    "build:esm": "npx tsc --moduleResolution node --module es6 --declaration ./src/index.ts --outDir ./dist/esm"
+    "doc:dev": "next dev",
+    "doc:build": "next build",
+    "doc:start": "next start",
+    "pkg:build": "pkg:build:cjs && pkg:build:esm",
+    "pkg:build:cjs": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/cjs --module CommonJS",
+    "pkg:build:esm": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/es --module es6m"
   },
   "dependencies": {},
   "devDependencies": {
