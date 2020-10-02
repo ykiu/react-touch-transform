@@ -104,9 +104,12 @@ export interface CarouselItemState extends PinchPanState {
 
 export interface CarouselItemOptions {
   onTouchStart: EventHandler;
-  onSwipeHoriz: (direction: "left" | "right") => void;
-  disableSwipeLeft: boolean;
-  disableSwipeRight: boolean;
+  onSwipeHoriz?: (direction: "left" | "right") => void;
+  onSwipeVert?: (direction: "up" | "down") => void;
+  disableSwipeLeft?: boolean;
+  disableSwipeRight?: boolean;
+  disableSwipeUp?: boolean;
+  disableSwipeDown?: boolean;
   onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
   onScaleSnap: () => void;
   onXYSnap: () => void;
@@ -143,8 +146,11 @@ export default function useCarouselItem(
     const {
       onTouchStart,
       onSwipeHoriz,
+      onSwipeVert,
       disableSwipeLeft,
       disableSwipeRight,
+      disableSwipeUp,
+      disableSwipeDown,
       onOffset,
       onScaleSnap,
       onXYSnap,
@@ -225,26 +231,51 @@ export default function useCarouselItem(
           );
         };
 
-        if (onSwipeHoriz) {
+        const makeCallSwipeCallback = <D extends string>(
+          cb: (direction: D) => void,
+          axisIndex: 0 | 1
+        ) => (
+          startOffset: XY,
+          offset: XY,
+          directionName: D,
+          neg: 1 | -1 = 1
+        ) => {
           if (
-            !disableSwipeLeft &&
-            shouldSwipe(startOffsetTopLeft[0], offsetTopLeft[0], velocity)
-          ) {
-            onSwipeHoriz("left");
-            return false;
-          }
-          if (
-            !disableSwipeRight &&
             shouldSwipe(
-              -startOffsetBottomRight[0],
-              -offsetBottomRight[0],
-              -velocity
+              neg * startOffset[axisIndex],
+              neg * offset[axisIndex],
+              neg * velocity
             )
           ) {
-            onSwipeHoriz("right");
+            cb(directionName);
+            return true;
+          }
+          return false;
+        };
+
+        if (onSwipeHoriz) {
+          const callCb = makeCallSwipeCallback(onSwipeHoriz, 0);
+          if (
+            (!disableSwipeLeft &&
+              callCb(startOffsetTopLeft, offsetTopLeft, "left")) ||
+            (!disableSwipeRight &&
+              callCb(startOffsetBottomRight, offsetBottomRight, "right", -1))
+          ) {
             return false;
           }
         }
+        if (onSwipeVert) {
+          const callCb = makeCallSwipeCallback(onSwipeVert, 1);
+          if (
+            (!disableSwipeUp &&
+              callCb(startOffsetTopLeft, offsetTopLeft, "up")) ||
+            (!disableSwipeDown &&
+              callCb(startOffsetBottomRight, offsetBottomRight, "down", -1))
+          ) {
+            return false;
+          }
+        }
+
         const snapDelta = deriveSnapDelta(offsetTopLeft, offsetBottomRight);
         touchStartState.translateXY = subXY(startTranslateXY, snapDelta);
         carouselItemTouchStartState.offsetTopLeft = subXY(

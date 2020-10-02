@@ -26,7 +26,11 @@ const Sidenav: FC<SidenavProps> = ({ onClose }) => {
             <a>Simple Carousel</a>
           </Link>
         </h3>
-        <h3 className={styles.subheading}>Full Screen Carousel</h3>
+        <h3 className={styles.subheading}>
+          <Link href="/full-screen-carousel">
+            <a>Full Screen Carousel</a>
+          </Link>
+        </h3>
         <h3 className={styles.subheading}>Side Navigation</h3>
         <h3 className={styles.subheading}>Google Maps Clone</h3>
         <h2 className={styles.heading}>API Reference</h2>
