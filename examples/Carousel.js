@@ -23,9 +23,11 @@ const CarouselItem = React.forwardRef(function CarouselItem(
 ) {
   useCarouselItem(ref, {
     onOffset,
-    onSwipeHoriz,
-    disableSwipeLeft,
-    disableSwipeRight,
+    swipeDirections: [
+      !disableSwipeLeft && "left",
+      !disableSwipeRight && "right",
+    ].filter(Boolean),
+    onSwipe: onSwipeHoriz,
     onScaleSnap,
     onXYSnap,
     onTouchStart,

@@ -77,6 +77,25 @@ function detectDoubleTap(
   return true;
 }
 
+const swipeParams = {
+  left: {
+    axisIndex: 0,
+    coefficient: 1,
+  },
+  right: {
+    axisIndex: 0,
+    coefficient: -1,
+  },
+  up: {
+    axisIndex: 1,
+    coefficient: 1,
+  },
+  down: {
+    axisIndex: 1,
+    coefficient: -1,
+  },
+};
+
 export interface CarouselItemTouchMoveState {
   offsetTopLeft: XY;
   offsetBottomRight: XY;
@@ -102,14 +121,12 @@ export interface CarouselItemState extends PinchPanState {
   carouselItemTouchMoveState: CarouselItemTouchMoveState;
 }
 
+export type SwipeDirection = "left" | "right" | "up" | "down";
+
 export interface CarouselItemOptions {
   onTouchStart: EventHandler;
-  onSwipeHoriz?: (direction: "left" | "right") => void;
-  onSwipeVert?: (direction: "up" | "down") => void;
-  disableSwipeLeft?: boolean;
-  disableSwipeRight?: boolean;
-  disableSwipeUp?: boolean;
-  disableSwipeDown?: boolean;
+  swipeDirections: SwipeDirection[];
+  onSwipe: (direction: SwipeDirection) => void;
   onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
   onScaleSnap: () => void;
   onXYSnap: () => void;
@@ -145,12 +162,8 @@ export default function useCarouselItem(
 
     const {
       onTouchStart,
-      onSwipeHoriz,
-      onSwipeVert,
-      disableSwipeLeft,
-      disableSwipeRight,
-      disableSwipeUp,
-      disableSwipeDown,
+      swipeDirections,
+      onSwipe,
       onOffset,
       onScaleSnap,
       onXYSnap,
@@ -231,49 +244,20 @@ export default function useCarouselItem(
           );
         };
 
-        const makeCallSwipeCallback = <D extends string>(
-          cb: (direction: D) => void,
-          axisIndex: 0 | 1
-        ) => (
-          startOffset: XY,
-          offset: XY,
-          directionName: D,
-          neg: 1 | -1 = 1
-        ) => {
-          if (
-            shouldSwipe(
-              neg * startOffset[axisIndex],
-              neg * offset[axisIndex],
-              neg * velocity
-            )
-          ) {
-            cb(directionName);
-            return true;
-          }
+        const direction = swipeDirections.find((direction) => {
+          const { axisIndex, coefficient } = swipeParams[direction];
+          const startOffset =
+            coefficient === -1 ? startOffsetBottomRight : startOffsetTopLeft;
+          const offset = coefficient === -1 ? offsetBottomRight : offsetTopLeft;
+          return shouldSwipe(
+            coefficient * startOffset[axisIndex],
+            coefficient * offset[axisIndex],
+            coefficient * velocity
+          );
+        });
+        if (direction) {
+          onSwipe(direction);
           return false;
-        };
-
-        if (onSwipeHoriz) {
-          const callCb = makeCallSwipeCallback(onSwipeHoriz, 0);
-          if (
-            (!disableSwipeLeft &&
-              callCb(startOffsetTopLeft, offsetTopLeft, "left")) ||
-            (!disableSwipeRight &&
-              callCb(startOffsetBottomRight, offsetBottomRight, "right", -1))
-          ) {
-            return false;
-          }
-        }
-        if (onSwipeVert) {
-          const callCb = makeCallSwipeCallback(onSwipeVert, 1);
-          if (
-            (!disableSwipeUp &&
-              callCb(startOffsetTopLeft, offsetTopLeft, "up")) ||
-            (!disableSwipeDown &&
-              callCb(startOffsetBottomRight, offsetBottomRight, "down", -1))
-          ) {
-            return false;
-          }
         }
 
         const snapDelta = deriveSnapDelta(offsetTopLeft, offsetBottomRight);
