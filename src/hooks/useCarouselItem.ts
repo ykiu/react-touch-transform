@@ -219,7 +219,7 @@ export default function useCarouselItem(
         if (!clientRect || !timeStamp || !prevTimeStamp) {
           return;
         }
-        const { width } = clientRect;
+        const { width, height } = clientRect;
 
         if (scaleFactor < 1) {
           touchStartState.scaleFactor = 1;
@@ -228,18 +228,20 @@ export default function useCarouselItem(
           return;
         }
 
-        const velocity =
-          (translateXY[0] - prevTranslateXY[0]) / (timeStamp - prevTimeStamp);
-        const thresholdWidth = (width / startScaleFactor) * 0.5;
+        const swipeThresholdPosition = mulXY(
+          [width, height],
+          0.5 / startScaleFactor
+        );
 
         const shouldSwipe = (
+          thresholdPosition: number,
           startPosition: number,
           position: number,
           velocity: number
         ): boolean => {
           return (
             startPosition === 0 &&
-            (position > thresholdWidth ||
+            (position > thresholdPosition ||
               (position > 0 && velocity > VELOCITY_THRESHOLD))
           );
         };
@@ -249,7 +251,11 @@ export default function useCarouselItem(
           const startOffset =
             coefficient === -1 ? startOffsetBottomRight : startOffsetTopLeft;
           const offset = coefficient === -1 ? offsetBottomRight : offsetTopLeft;
+          const velocity =
+            (translateXY[axisIndex] - prevTranslateXY[axisIndex]) /
+            (timeStamp - prevTimeStamp);
           return shouldSwipe(
+            swipeThresholdPosition[axisIndex],
             coefficient * startOffset[axisIndex],
             coefficient * offset[axisIndex],
             coefficient * velocity

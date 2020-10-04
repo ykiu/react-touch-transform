@@ -38,6 +38,52 @@ const FullScreenCarouselItem = React.forwardRef(function FullScreenCarouselItem(
   );
 });
 
+function CarouselContainer({ prev, current, next, value, onSwipe }) {
+  const {
+    onOffset,
+    onScaleSnap,
+    onXYSnap,
+    onTouchStart,
+  } = useCarouselContainer(prev, current, next, {
+    value,
+    prevElementStyle,
+    prevElementStyleCleanUp,
+    nextElementStyle,
+    nextElementStyleCleanUp,
+  });
+
+  return (
+    <div className={styles.carousel}>
+      {[prev, current, next].map((ref, i) => {
+        const urlIndex = value + i - 1;
+        const url = urls[urlIndex];
+        const isFirst = urlIndex === 0;
+        const isLast = urlIndex === urls.length - 1;
+        return (
+          url && (
+            <FullScreenCarouselItem
+              key={url}
+              ref={ref}
+              url={url}
+              swipeDirections={[
+                !isFirst && "left",
+                !isLast && "right",
+                "up",
+                "down",
+              ].filter(Boolean)}
+              onSwipe={onSwipe}
+              onOffset={onOffset}
+              onScaleSnap={onScaleSnap}
+              onXYSnap={onXYSnap}
+              onTouchStart={onTouchStart}
+            />
+          )
+        );
+      })}
+    </div>
+  );
+}
+
 export default function FullScreenCarousel({ className }) {
   const [carouselOpen, setCarouselOpen] = useState(false);
   const toggleCarousel = useCallback(
@@ -61,52 +107,19 @@ export default function FullScreenCarousel({ className }) {
         setValue((value) => value + 1);
     }
   };
-  const {
-    onOffset,
-    onScaleSnap,
-    onXYSnap,
-    onTouchStart,
-  } = useCarouselContainer(prev, current, next, {
-    value,
-    prevElementStyle,
-    prevElementStyleCleanUp,
-    nextElementStyle,
-    nextElementStyleCleanUp,
-  });
   return (
     <div className={clsx(styles.root, className)}>
       <button className={styles.btn} onClick={toggleCarousel}>
         OPEN CAROUSEL
       </button>
       {carouselOpen && (
-        <div className={styles.carousel}>
-          {[prev, current, next].map((ref, i) => {
-            const urlIndex = value + i - 1;
-            const url = urls[urlIndex];
-            const isFirst = urlIndex === 0;
-            const isLast = urlIndex === urls.length - 1;
-            return (
-              url && (
-                <FullScreenCarouselItem
-                  key={url}
-                  ref={ref}
-                  url={url}
-                  swipeDirections={[
-                    !isFirst && "left",
-                    !isLast && "right",
-                    "up",
-                    "down",
-                  ].filter(Boolean)}
-                  onSwipe={onSwipe}
-                  onOffset={onOffset}
-                  onScaleSnap={onScaleSnap}
-                  onXYSnap={onXYSnap}
-                  onTouchStart={onTouchStart}
-                />
-              )
-            );
-          })}
-        </div>
+        <CarouselContainer
+          prev={prev}
+          current={current}
+          next={next}
+          value={value}
+          onSwipe={onSwipe}
+        />
       )}
     </div>
   );
