@@ -12,9 +12,8 @@ const CarouselItem = React.forwardRef(function CarouselItem(
     url,
     className,
     onOffset,
-    onSwipeHoriz,
-    disableSwipeLeft,
-    disableSwipeRight,
+    onSwipe,
+    swipeDirections,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
@@ -23,11 +22,8 @@ const CarouselItem = React.forwardRef(function CarouselItem(
 ) {
   useCarouselItem(ref, {
     onOffset,
-    swipeDirections: [
-      !disableSwipeLeft && "left",
-      !disableSwipeRight && "right",
-    ].filter(Boolean),
-    onSwipe: onSwipeHoriz,
+    swipeDirections,
+    onSwipe,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
@@ -47,7 +43,7 @@ export default function Carousel({ className }) {
   const prev = useRef(null);
   const current = useRef(null);
   const next = useRef(null);
-  const onSwipeHoriz = (direction) =>
+  const onSwipe = (direction) =>
     setValue((value) => value + (direction === "left" ? -1 : 1));
   const {
     onOffset,
@@ -75,9 +71,11 @@ export default function Carousel({ className }) {
                 key={url}
                 ref={ref}
                 url={url}
-                disableSwipeLeft={isFirst}
-                disableSwipeRight={isLast}
-                onSwipeHoriz={onSwipeHoriz}
+                swipeDirections={[
+                  !isFirst && "left",
+                  !isLast && "right",
+                ].filter(Boolean)}
+                onSwipe={onSwipe}
                 onOffset={onOffset}
                 onScaleSnap={onScaleSnap}
                 onXYSnap={onXYSnap}
