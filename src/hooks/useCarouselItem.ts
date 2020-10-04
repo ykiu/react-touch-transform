@@ -197,7 +197,7 @@ export default function useCarouselItem(
         translateXY: startTranslateXY,
       } = touchStartState;
 
-      const returnValue = ((): false | undefined => {
+      try {
         if (event.type === "touchstart") {
           carouselItemTouchStartState.doubletapXY = deriveDoubleTapXY(event);
         } else if (doubletapXY && event.touches.length === 0) {
@@ -273,13 +273,12 @@ export default function useCarouselItem(
         if (snapDelta[0] !== 0 || snapDelta[1] !== 0) {
           onXYSnap();
         }
-      })();
-
-      carouselItemTouchMoveState.offsetTopLeft =
-        carouselItemTouchStartState.offsetTopLeft;
-      carouselItemTouchMoveState.offsetBottomRight =
-        carouselItemTouchStartState.offsetBottomRight;
-      return returnValue;
+      } finally {
+        carouselItemTouchMoveState.offsetTopLeft =
+          carouselItemTouchStartState.offsetTopLeft;
+        carouselItemTouchMoveState.offsetBottomRight =
+          carouselItemTouchStartState.offsetBottomRight;
+      }
     }
     function handleTouchMove(event: TouchEvent): void {
       const { translateXY, scaleFactor } = touchMoveState;
