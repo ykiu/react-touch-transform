@@ -9,9 +9,9 @@
     "doc:dev": "next dev",
     "doc:build": "next build",
     "doc:start": "next start",
-    "pkg:build": "pkg:build:cjs && pkg:build:esm",
+    "pkg:build": "npm run pkg:build:cjs && npm run pkg:build:esm",
     "pkg:build:cjs": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/cjs --module CommonJS",
-    "pkg:build:esm": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/es --module es6m"
+    "pkg:build:esm": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/esm --module es6"
   },
   "dependencies": {},
   "devDependencies": {
