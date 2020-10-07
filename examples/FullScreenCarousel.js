@@ -38,7 +38,22 @@ const FullScreenCarouselItem = React.forwardRef(function FullScreenCarouselItem(
   );
 });
 
-function CarouselContainer({ prev, current, next, value, onSwipe }) {
+const exitStyles = {
+  up: {
+    transition: "transform 500ms cubic-bezier(.17,.95,.45,.99)",
+    transform: "translateY(100%)",
+  },
+  down: {
+    transition: "transform 500ms cubic-bezier(.17,.95,.45,.99)",
+    transform: "translateY(-100%)",
+  },
+};
+
+function CarouselContainer({ onExit }) {
+  const prev = useRef(null);
+  const current = useRef(null);
+  const next = useRef(null);
+  const [value, setValue] = useState(0);
   const {
     onOffset,
     onScaleSnap,
@@ -51,35 +66,55 @@ function CarouselContainer({ prev, current, next, value, onSwipe }) {
     nextElementStyle,
     nextElementStyleCleanUp,
   });
-
+  const [closing, setClosing] = useState(false);
+  const closeCarousel = (direction) => {
+    Object.assign(current.current.style, exitStyles[direction]);
+    setClosing(true);
+    setTimeout(onExit, 500);
+  };
+  const onSwipe = (direction) => {
+    switch (direction) {
+      case "up":
+      case "down":
+        closeCarousel(direction);
+        break;
+      case "left":
+        setValue((value) => value - 1);
+        break;
+      case "right":
+        setValue((value) => value + 1);
+    }
+  };
   return (
-    <div className={styles.carousel}>
-      {[prev, current, next].map((ref, i) => {
-        const urlIndex = value + i - 1;
-        const url = urls[urlIndex];
-        const isFirst = urlIndex === 0;
-        const isLast = urlIndex === urls.length - 1;
-        return (
-          url && (
-            <FullScreenCarouselItem
-              key={url}
-              ref={ref}
-              url={url}
-              swipeDirections={[
-                !isFirst && "left",
-                !isLast && "right",
-                "up",
-                "down",
-              ].filter(Boolean)}
-              onSwipe={onSwipe}
-              onOffset={onOffset}
-              onScaleSnap={onScaleSnap}
-              onXYSnap={onXYSnap}
-              onTouchStart={onTouchStart}
-            />
-          )
-        );
-      })}
+    <div className={clsx(styles.carousel, closing && styles.carouselClosing)}>
+      <div className={styles.carouselSlideIn}>
+        {[prev, current, next].map((ref, i) => {
+          const urlIndex = value + i - 1;
+          const url = urls[urlIndex];
+          const isFirst = urlIndex === 0;
+          const isLast = urlIndex === urls.length - 1;
+          return (
+            url && (
+              <FullScreenCarouselItem
+                key={url}
+                ref={ref}
+                url={url}
+                swipeDirections={[
+                  !isFirst && "left",
+                  !isLast && "right",
+                  "up",
+                  "down",
+                ].filter(Boolean)}
+                onSwipe={onSwipe}
+                onOffset={onOffset}
+                onScaleSnap={onScaleSnap}
+                onXYSnap={onXYSnap}
+                onTouchStart={onTouchStart}
+              />
+            )
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -90,37 +125,12 @@ export default function FullScreenCarousel({ className }) {
     () => setCarouselOpen((open) => !open),
     []
   );
-  const [value, setValue] = useState(0);
-  const prev = useRef(null);
-  const current = useRef(null);
-  const next = useRef(null);
-  const onSwipe = (direction) => {
-    switch (direction) {
-      case "up":
-      case "down":
-        toggleCarousel();
-        break;
-      case "left":
-        setValue((value) => value - 1);
-        break;
-      case "right":
-        setValue((value) => value + 1);
-    }
-  };
   return (
     <div className={clsx(styles.root, className)}>
       <button className={styles.btn} onClick={toggleCarousel}>
         OPEN CAROUSEL
       </button>
-      {carouselOpen && (
-        <CarouselContainer
-          prev={prev}
-          current={current}
-          next={next}
-          value={value}
-          onSwipe={onSwipe}
-        />
-      )}
+      {carouselOpen && <CarouselContainer onExit={toggleCarousel} />}
     </div>
   );
 }

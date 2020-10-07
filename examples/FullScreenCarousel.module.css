@@ -6,15 +6,44 @@
   border-style: none;
 }
 
+@keyframes fadeIn {
+  0% {
+    background-color: rgba(0,0,0,0);
+  }
+  100% {
+    background-color: rgba(0,0,0,0.75);
+  }
+}
+
 .carousel {
   width: 100%;
   height: 100%;
   position: fixed;
   top: 0;
   left: 0;
-  background: rgba(0,0,0,0.75);
+  background-color: rgba(0,0,0,0.75);
+  transition: background-color 300ms;
+  animation: fadeIn 300ms;
 }
 
+.carouselClosing {
+  background-color: rgba(0,0,0,0);
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.carouselSlideIn {
+  width: 100%;
+  height: 100%;
+  animation: slideIn 500ms cubic-bezier(.17,.95,.45,.99);
+}
 .image {
   object-fit: contain;
   width: 100%;
