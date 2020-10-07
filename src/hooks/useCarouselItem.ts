@@ -12,7 +12,7 @@ import { RefObject } from "react";
 
 const { min, max } = Math;
 const VELOCITY_THRESHOLD = 0.1;
-const AXIS_LOCK_THRESHOLD = 5;
+const AXIS_LOCK_THRESHOLD = 10;
 const DOUBLE_TAP_MOVEMENT_THRESHOLD = 10;
 const DOUBLE_TAP_INTERVAL_THRESHOLD = 500;
 
@@ -27,7 +27,7 @@ function deriveAxis(
     return "any";
   }
   const distance = getDistance([0, 0], translateXY);
-  if (distance > AXIS_LOCK_THRESHOLD) {
+  if (prevAxis !== "any" && distance > AXIS_LOCK_THRESHOLD) {
     return prevAxis;
   }
   return Math.abs(translateXY[0]) > Math.abs(translateXY[1]) ? "x" : "y";
