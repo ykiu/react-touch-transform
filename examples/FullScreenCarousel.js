@@ -21,6 +21,7 @@ const FullScreenCarouselItem = React.forwardRef(function FullScreenCarouselItem(
   ref
 ) {
   useCarouselItem(ref, {
+    axis: "xy",
     swipeDirections,
     onOffset,
     onSwipe,

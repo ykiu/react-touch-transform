@@ -21,8 +21,9 @@ const CarouselItem = React.forwardRef(function CarouselItem(
   ref
 ) {
   useCarouselItem(ref, {
-    onOffset,
+    axis: "x",
     swipeDirections,
+    onOffset,
     onSwipe,
     onScaleSnap,
     onXYSnap,

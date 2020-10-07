@@ -16,19 +16,24 @@ const AXIS_LOCK_THRESHOLD = 10;
 const DOUBLE_TAP_MOVEMENT_THRESHOLD = 10;
 const DOUBLE_TAP_INTERVAL_THRESHOLD = 500;
 
-type Axis = "x" | "y" | "any";
+type ActiveAxis = "x" | "y" | "any";
+type Axis = "xy" | ActiveAxis;
 
 function deriveAxis(
+  axis: Axis,
+  prevActiveAxis: ActiveAxis,
   translateXY: XY,
-  scaleFactor: number,
-  prevAxis: Axis
-): Axis {
+  scaleFactor: number
+): ActiveAxis {
   if (scaleFactor !== 1) {
     return "any";
   }
+  if (axis !== "xy") {
+    return axis;
+  }
   const distance = getDistance([0, 0], translateXY);
-  if (prevAxis !== "any" && distance > AXIS_LOCK_THRESHOLD) {
-    return prevAxis;
+  if (prevActiveAxis !== "any" && distance > AXIS_LOCK_THRESHOLD) {
+    return prevActiveAxis;
   }
   return Math.abs(translateXY[0]) > Math.abs(translateXY[1]) ? "x" : "y";
 }
@@ -107,7 +112,7 @@ export interface CarouselItemTouchMoveState {
   prevTranslateXY: XY;
 
   // Axis locking
-  activeAxis: Axis;
+  activeAxis: ActiveAxis;
 }
 
 export interface CarouselItemTouchStartState {
@@ -124,8 +129,9 @@ export interface CarouselItemState extends PinchPanState {
 export type SwipeDirection = "left" | "right" | "up" | "down";
 
 export interface CarouselItemOptions {
-  onTouchStart: EventHandler;
   swipeDirections: SwipeDirection[];
+  axis: Axis;
+  onTouchStart: EventHandler;
   onSwipe: (direction: SwipeDirection) => void;
   onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
   onScaleSnap: () => void;
@@ -161,8 +167,9 @@ export default function useCarouselItem(
     };
 
     const {
-      onTouchStart,
       swipeDirections,
+      axis,
+      onTouchStart,
       onSwipe,
       onOffset,
       onScaleSnap,
@@ -306,7 +313,12 @@ export default function useCarouselItem(
       const { timeStamp } = event;
 
       // Lock axis
-      const activeAxis = deriveAxis(translateXY, scaleFactor, prevActiveAxis);
+      const activeAxis = deriveAxis(
+        axis,
+        prevActiveAxis,
+        translateXY,
+        scaleFactor
+      );
       if (activeAxis === "x") {
         translateXY[1] = 0;
       } else if (activeAxis === "y") {
