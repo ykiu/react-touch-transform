@@ -1,4 +1,4 @@
-import { RefObject, useLayoutEffect } from "react";
+import { RefObject, useEffect } from "react";
 import {
   addXY,
   divXY,
@@ -58,7 +58,7 @@ export default function usePinchPan(
   elementRef: RefObject<HTMLElement>,
   options: PinchPanOptions | ((state: PinchPanState) => PinchPanOptions) = {}
 ): void {
-  useLayoutEffect(() => {
+  useEffect(() => {
     const element = elementRef.current as NonNullable<
       typeof elementRef.current
     >;

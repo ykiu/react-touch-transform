@@ -10,13 +10,14 @@ import styles from "./FullScreenCarousel.module.css";
 const FullScreenCarouselItem = React.forwardRef(function FullScreenCarouselItem(
   {
     url,
-    className,
     swipeDirections,
     onOffset,
     onSwipe,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
+    className,
+    style,
   },
   ref
 ) {
@@ -31,10 +32,11 @@ const FullScreenCarouselItem = React.forwardRef(function FullScreenCarouselItem(
   });
   return (
     <img
-      className={clsx(styles.image, className)}
       ref={ref}
       src={url}
       alt="Full Screen Carousel Sample"
+      className={clsx(styles.image, className)}
+      style={style}
     />
   );
 });
@@ -50,44 +52,59 @@ const exitStyles = {
   },
 };
 
+const initialStyles = [
+  {
+    ...prevElementStyle([0, 0], [0, 0]),
+  },
+  {
+    transform: "translate(0, 0)",
+  },
+  {
+    ...nextElementStyle([0, 0], [0, 0]),
+  },
+];
+
 function CarouselContainer({ onExit }) {
   const prev = useRef(null);
   const current = useRef(null);
   const next = useRef(null);
   const [value, setValue] = useState(0);
+  const [closeDirection, setCloseDirection] = useState(null);
+  const closeCarousel = (direction) => {
+    setCloseDirection(direction);
+    setTimeout(onExit, 500);
+  };
   const {
+    onSwipe,
     onOffset,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
   } = useCarouselContainer(prev, current, next, {
     value,
+    onSwipe: (direction) => {
+      switch (direction) {
+        case "up":
+        case "down":
+          closeCarousel(direction);
+          break;
+        case "left":
+          setValue((value) => value - 1);
+          break;
+        case "right":
+          setValue((value) => value + 1);
+      }
+    },
     prevElementStyle,
-    prevElementStyleCleanUp,
     nextElementStyle,
-    nextElementStyleCleanUp,
   });
-  const [closing, setClosing] = useState(false);
-  const closeCarousel = (direction) => {
-    Object.assign(current.current.style, exitStyles[direction]);
-    setClosing(true);
-    setTimeout(onExit, 500);
-  };
-  const onSwipe = (direction) => {
-    switch (direction) {
-      case "up":
-      case "down":
-        closeCarousel(direction);
-        break;
-      case "left":
-        setValue((value) => value - 1);
-        break;
-      case "right":
-        setValue((value) => value + 1);
-    }
-  };
   return (
-    <div className={clsx(styles.carousel, closing && styles.carouselClosing)}>
+    <div
+      className={clsx(
+        styles.carousel,
+        closeDirection && styles.carouselClosing
+      )}
+    >
       <div className={styles.carouselSlideIn}>
         {[prev, current, next].map((ref, i) => {
           const urlIndex = value + i - 1;
@@ -106,6 +123,11 @@ function CarouselContainer({ onExit }) {
                   "up",
                   "down",
                 ].filter(Boolean)}
+                style={
+                  i === 1 && closeDirection
+                    ? exitStyles[closeDirection]
+                    : initialStyles[i]
+                }
                 onSwipe={onSwipe}
                 onOffset={onOffset}
                 onScaleSnap={onScaleSnap}
@@ -148,10 +170,6 @@ function prevElementStyle(offsetTopLeft) {
   return { transform: `translateX(calc(${offsetTopLeft[0]}px - 100%))` };
 }
 
-const prevElementStyleCleanUp = { transform: null };
-
 function nextElementStyle(offsetTopLeft, offsetBottomRight) {
   return { transform: `translateX(calc(${offsetBottomRight[0]}px + 100%))` };
 }
-
-const nextElementStyleCleanUp = { transform: null };

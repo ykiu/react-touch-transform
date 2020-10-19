@@ -1,4 +1,5 @@
-import { MutableRefObject, RefObject, useLayoutEffect, useRef } from "react";
+import { MutableRefObject, RefObject, useRef } from "react";
+import { SwipeDirection } from "./useCarouselItem";
 import { noop, XY } from "../utils";
 
 function styleRefElement(
@@ -47,21 +48,19 @@ const scaleSnapTransition = transitionRefElement(
 );
 
 export interface CarouselContainerOptions {
-  value: unknown;
-  onSwipe: (direction: "left" | "right") => void;
+  onSwipe: (direction: SwipeDirection) => void;
   prevElementStyle: (
     offsetTopLeft: XY,
     offsetBottomRight: XY
   ) => Partial<CSSStyleDeclaration>;
-  prevElementStyleCleanUp: Partial<CSSStyleDeclaration>;
   nextElementStyle: (
     offsetTopLeft: XY,
     offsetBottomRight: XY
   ) => Partial<CSSStyleDeclaration>;
-  nextElementStyleCleanUp: Partial<CSSStyleDeclaration>;
 }
 
 export interface CarouselContainerUtils {
+  onSwipe: (direction: SwipeDirection) => void;
   onOffset: (offsetTopLeft: XY, offsetBottomRight: XY) => void;
   onScaleSnap: () => void;
   onTouchStart: () => void;
@@ -72,13 +71,7 @@ export default function useCarouselContainer(
   prev: RefObject<HTMLElement>,
   current: RefObject<HTMLElement>,
   next: RefObject<HTMLElement>,
-  {
-    value,
-    prevElementStyle,
-    prevElementStyleCleanUp,
-    nextElementStyle,
-    nextElementStyleCleanUp,
-  }: CarouselContainerOptions
+  { onSwipe, prevElementStyle, nextElementStyle }: CarouselContainerOptions
 ): CarouselContainerUtils {
   const prevTerminateTransition = useRef(noop);
   const currentTerminateTransition = useRef(noop);
@@ -104,30 +97,21 @@ export default function useCarouselContainer(
     styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
   }
 
+  function handleSwipe(direction: SwipeDirection) {
+    shiftTransition(prev, prevTerminateTransition);
+    shiftTransition(current, currentTerminateTransition);
+    shiftTransition(next, nextTerminateTransition);
+    onSwipe(direction);
+  }
+
   function handleTouchStart() {
     prevTerminateTransition.current();
     currentTerminateTransition.current();
     nextTerminateTransition.current();
   }
 
-  useLayoutEffect(() => {
-    shiftTransition(prev, prevTerminateTransition);
-    shiftTransition(current, currentTerminateTransition);
-    shiftTransition(next, nextTerminateTransition);
-    styleRefElement(prev, prevElementStyle([0, 0], [0, 0]));
-    styleRefElement(next, nextElementStyle([0, 0], [0, 0]));
-    const prevElement = prev.current;
-    const nextElement = next.current;
-    return () => {
-      if (prevElement)
-        Object.assign(prevElement.style, prevElementStyleCleanUp);
-      if (nextElement)
-        Object.assign(nextElement.style, nextElementStyleCleanUp);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
-
   return {
+    onSwipe: handleSwipe,
     onOffset: handleOffset,
     onScaleSnap: handleScaleSnap,
     onTouchStart: handleTouchStart,

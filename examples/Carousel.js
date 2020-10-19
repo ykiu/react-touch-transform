@@ -10,13 +10,14 @@ import styles from "./Carousel.module.css";
 const CarouselItem = React.forwardRef(function CarouselItem(
   {
     url,
-    className,
     onOffset,
     onSwipe,
     swipeDirections,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
+    className,
+    style,
   },
   ref
 ) {
@@ -31,32 +32,44 @@ const CarouselItem = React.forwardRef(function CarouselItem(
   });
   return (
     <img
-      className={clsx(styles.image, className)}
       ref={ref}
       src={url}
       alt="Carousel Sample"
+      className={clsx(styles.image, className)}
+      style={style}
     />
   );
 });
+
+const initialStyles = [
+  {
+    ...prevElementStyle([0, 0], [0, 0]),
+  },
+  {
+    transform: "translate(0, 0)",
+  },
+  {
+    ...nextElementStyle([0, 0], [0, 0]),
+  },
+];
 
 export default function Carousel({ className }) {
   const [value, setValue] = useState(0);
   const prev = useRef(null);
   const current = useRef(null);
   const next = useRef(null);
-  const onSwipe = (direction) =>
-    setValue((value) => value + (direction === "left" ? -1 : 1));
   const {
+    onSwipe,
     onOffset,
     onScaleSnap,
     onXYSnap,
     onTouchStart,
   } = useCarouselContainer(prev, current, next, {
     value,
+    onSwipe: (direction) =>
+      setValue((value) => value + (direction === "left" ? -1 : 1)),
     prevElementStyle,
-    prevElementStyleCleanUp,
     nextElementStyle,
-    nextElementStyleCleanUp,
   });
   return (
     <div className={clsx(styles.root, className)}>
@@ -76,6 +89,7 @@ export default function Carousel({ className }) {
                   !isFirst && "left",
                   !isLast && "right",
                 ].filter(Boolean)}
+                style={initialStyles[i]}
                 onSwipe={onSwipe}
                 onOffset={onOffset}
                 onScaleSnap={onScaleSnap}
@@ -102,10 +116,6 @@ function prevElementStyle(offsetTopLeft) {
   return { transform: `translateX(calc(${offsetTopLeft[0]}px - 100%))` };
 }
 
-const prevElementStyleCleanUp = { transform: null };
-
 function nextElementStyle(offsetTopLeft, offsetBottomRight) {
   return { transform: `translateX(calc(${offsetBottomRight[0]}px + 100%))` };
 }
-
-const nextElementStyleCleanUp = { transform: null };
