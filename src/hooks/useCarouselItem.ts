@@ -1,4 +1,4 @@
-import usePinchPan, { EventHandler, PinchPanState } from "./usePinchPan";
+import { usePinchPan, EventHandler, PinchPanState } from "./usePinchPan";
 import {
   mulXY,
   divXY,
@@ -138,7 +138,7 @@ export interface CarouselItemOptions {
   onXYSnap: () => void;
 }
 
-export default function useCarouselItem(
+export function useCarouselItem(
   ref: RefObject<HTMLElement>,
   options:
     | CarouselItemOptions

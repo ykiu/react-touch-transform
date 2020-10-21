@@ -54,7 +54,7 @@ export interface PinchPanOptions {
   onTouchStart?: EventHandler;
 }
 
-export default function usePinchPan(
+export function usePinchPan(
   elementRef: RefObject<HTMLElement>,
   options: PinchPanOptions | ((state: PinchPanState) => PinchPanOptions) = {}
 ): void {

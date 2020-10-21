@@ -9,10 +9,16 @@
     "doc:dev": "next dev",
     "doc:build": "next build",
     "doc:start": "next start",
-    "pkg:build": "npm run pkg:build:cjs && npm run pkg:build:esm",
-    "pkg:build:cjs": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/cjs --module CommonJS",
-    "pkg:build:esm": "tsc --moduleResolution node --declaration ./src/index.ts --outDir ./dist/esm --module es6"
+    "pkg:build": "rimraf dist && npm run pkg:build:cjs && npm run pkg:build:esm",
+    "pkg:build:esm": "tsc ./src/index.ts --moduleResolution node --outDir ./dist/esm --declarationDir ./dist/types --module es6 --declaration",
+    "pkg:build:cjs": "tsc ./src/index.ts --moduleResolution node --outDir ./dist/cjs --module CommonJS"
   },
+  "files": [
+    "dist"
+  ],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.js",
   "dependencies": {},
   "devDependencies": {
     "@types/node": "^14.10.1",
@@ -32,6 +38,7 @@
     "prettier": "^2.1.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "rimraf": "^3.0.2",
     "typescript": "^4.0.2"
   }
 }

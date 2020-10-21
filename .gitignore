@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+*.tgz
 
 # debug
 npm-debug.log*
@@ -34,6 +35,5 @@ yarn-error.log*
 # vercel
 .vercel
 
-# ESLint
-
+# eslint
 .eslintcache

@@ -2,8 +2,8 @@
 import React, { useCallback, useRef, useState } from "react";
 import clsx from "clsx";
 
-import useCarouselContainer from "../src/hooks/useCarouselContainer";
-import useCarouselItem from "../src/hooks/useCarouselItem";
+import { useCarouselContainer } from "../src/hooks/useCarouselContainer";
+import { useCarouselItem } from "../src/hooks/useCarouselItem";
 
 import styles from "./FullScreenCarousel.module.css";
 

@@ -67,7 +67,7 @@ export interface CarouselContainerUtils {
   onXYSnap: () => void;
 }
 
-export default function useCarouselContainer(
+export function useCarouselContainer(
   prev: RefObject<HTMLElement>,
   current: RefObject<HTMLElement>,
   next: RefObject<HTMLElement>,
