@@ -22,7 +22,7 @@ $ npm i -D
 Launch the document in the development mode to interact with the stuff inside the package:
 
 ```bash
-$ npm run doc:dev # lauches the development server on http://0.0.0.0:8000.
+$ npm run doc:dev # lauches the development server on http://0.0.0.0:3000.
 ```
 
 #### Linting, formatting and type checking
